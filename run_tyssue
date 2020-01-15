@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --nodes=1
+
+source /usr/usc/anaconda/3.2019.07/setup.sh
+~/.bashrc
+conda init
+source activate first
+conda list
+python script_bcsource.py four
+
+
