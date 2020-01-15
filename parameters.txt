@@ -2,7 +2,6 @@ nx				80
 ny				80
 pos_noise 			0.
 rx 			13
-source_term_width		1
 MF_low				0.1
 MF_high				1.
 MF_contract			0.8
