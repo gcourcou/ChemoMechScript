@@ -79,6 +79,7 @@ def cell_GS(sheet,amin=0.5,amax=0.6,gamma_G=0.25,gamma_S=0.1,dt=1):
                     if  random.random() <= (row['area']-amin)*gamma_G*dt/amin:
                         #sheet.face_df.at[index,'prefered_area']=1.5                                                                                  
                         sheet.face_df.at[index,'cell_cycle'] = 'S'
+                        sheet.face_df.at[index,'prefered_area']=2.0
             elif row['cell_cycle'] == 'S':
                 #update the probability(in fact this part never changes)                                                                              
                 #sheet.face_df.at[index,'probability_div'] = gamma_S*dt                                                                               
