@@ -161,13 +161,9 @@ Dif_mag={0:y_dif}
 Decay_mag={0:y_dec}
 #
 auto_prod_mag={0:h_auto,1:[]}
-auto_prod_mag_steady_state={0:h_auto,1:[]}
-# since we want MF as a source of 2 we need to have a list 
-steady_state_timer=parameters['steady_state_timer']
-auto_prod_mag_steady_state[0]=[-1*(int(row['y_boundary_source_term'])*2-1) for index,row in sheet.face_df.iterrows()]
 
 # auto_prod_mag[1] is updated in mech_interaction in the loop 
-auto_prod_mag[0]=[h_auto for i in range(0,sheet.face_df.shape[0])]
+auto_prod_mag[0]=[-h_auto*(int(row['y_boundary_source_term'])*2-1) for index,row in sheet.face_df.iterrows()]
 # Cell div pars
 
 #Cell grow and divide params
@@ -263,16 +259,6 @@ def cell(t, y):
         #print (fun)
     return fun
 
-def cell_steady_state(t, y):
-    fun=[]
-    # each cell is defined by its face index 
-    # 0...Ncell is the calse but lets keep it general for now
-    for N_p, p_name in proteins.items():
-        for index, row in sheet.face_df.iterrows():
-            fun+= [Dif(t,y,index,int(N_p),Dif_mag)+Decay(t,y,index,int(N_p),Decay_mag) + Auto_Production(t,y,index,int(N_p),row,auto_prod_mag_steady_state) ]
-        #print ("fun")
-        #print (fun)
-    return fun
 
 
 
@@ -437,7 +423,20 @@ def visualization(i):
 
 def mechanical_reaction(tyssue) :
     mf_inf_cell(tyssue, MF_low, MF_high, MF_contract,MF_relax,string='y_concentration')
-    auto_prod_mag[0]=[h_auto for i in range(0,sheet.face_df.shape[0])]
+    #define boundary source terms carefully since tissue moves
+    sheet.face_df['on_boundary']=False
+    for index,row in sheet.edge_df.iterrows():
+        if row["opposite"]==-1:
+            face_id=row["face"]
+            sheet.face_df.at[face_id, 'on_boundary'] = True
+    source_term_width=0.2*(sheet.face_df['x'].max()-sheet.face_df['x'].min())
+    with_axis_offset=sheet.face_df['x'].max()-source_term_width
+    sheet.face_df['y_boundary_source_term']=False
+    for index, row in sheet.face_df.iterrows():
+        if (row["x"]>with_axis_offset and row["on_boundary"]):
+            sheet.face_df.at[index,'y_boundary_source_term'] = True
+    
+    auto_prod_mag[0]=[-h_auto*(int(row['y_boundary_source_term'])*2-1) for index,row in sheet.face_df.iterrows()]
     #auto_prod_mag[1]=[0.0 for i in range(0,sheet.face_df.shape[0])]
     for index,row in sheet.face_df.iterrows():
         #auto_prod_mag[1][index]=1000
@@ -495,17 +494,11 @@ def data_collection(i,tyssue,cell_number,MF_position,mech_timer):
     mech_timer+=[i*t_mech]
 
 
-def chemo_mech_iterator(sheet,initial_concentration, derivative_function, derivative_function_steady_state, mechanical_reaction,cell_grow_and_divide,visualization,**kwargs):
+def chemo_mech_iterator(sheet,initial_concentration, derivative_function, mechanical_reaction,cell_grow_and_divide,visualization,**kwargs):
     #mechanical_reaction should take only the tyssue object as argument and output
     #derivative function returns n-value vector args (t,x)
     # plot_function should take only the step number as argument i.e. def visualization(step) : animate_cells2(step,"mech")
     steps=int(kwargs['t_f']/kwargs['t_mech'])
-    sol = solve_ivp(derivative_function_steady_state, [0, steady_state_timer], initial_concentration)
-    initial_concentration=[item[-1] for item in sol.y]
-    # put chem result in tissue object
-    for N_p, p_name in proteins.items():
-        sheet.face_df[p_name]=initial_concentration[len(sheet.face_df)*int(N_p):len(sheet.face_df)*(int(N_p)+1)]
-    mechanical_reaction(sheet)
     for i in range(0,steps):
         print(i)
         # time evolve by one t_mech step
@@ -540,7 +533,7 @@ def chemo_mech_iterator(sheet,initial_concentration, derivative_function, deriva
         data_collection(i,sheet,store_cell_number,store_MF_position,store_mech_timer)
     return sol
 
-sol=chemo_mech_iterator(sheet,h0,cell,cell_steady_state,mechanical_reaction,cell_grow_and_divide,visualization,plot=True,t_mech=t_mech,t_f=t_f,N_protein_types=0)
+sol=chemo_mech_iterator(sheet,h0,cell,mechanical_reaction,cell_grow_and_divide,visualization,plot=True,t_mech=t_mech,t_f=t_f,N_protein_types=0)
             
 ########3 END OF SoLUTiON SCRIPT ##########
 
