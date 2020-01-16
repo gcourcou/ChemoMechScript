@@ -11,7 +11,6 @@ t_f				    50
 y_dif				2
 y_dec				0.5
 h_auto				0.25
-steady_state_timer		10
 alpha_c				0.5
 t_M_mean			6
 t_I_mean			8
