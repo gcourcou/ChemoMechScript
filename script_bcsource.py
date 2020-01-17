@@ -175,7 +175,7 @@ c_dpp_0_noise_protection=parameters['c_dpp_0_noise_protection']
 growth_control_by=parameters['growth_control_by']
 
 ## Initialize other cell centric variabls not included in tyssue
-cell_vars = {'0':"cell_cycle", '1':"time_in_cycle", '2':"population _variable", '3':"time_for_M", '4':"time_for_I",'5':"c_dpp_0"}
+cell_vars = {'0':"cell_cycle", '1':"time_in_cycle", '2':"population _variable", '3':"time_for_M", '4':"time_for_I",'5':"c_dpp_0",'6':"time_in_growth",'7':"time_for_growth"}
 int_cell_cycle=parameters['int_cell_cycle']
 sheet.face_df['cell_cycle'] = int_cell_cycle
 sheet.face_df.insert(1,'time_in_cycle',0)
@@ -184,6 +184,8 @@ sheet.face_df.insert(1,'time_for_M',45/45)
 sheet.face_df.insert(1,'time_for_I', 4.99* 60/4.99/30)
 sheet.face_df.insert(1,'c_dpp_0',1.0)
 
+sheet.face_df.insert(1,'time_in_growth',0)
+sheet.face_df.insert(1,'time_for_growth',0)
 #sheet.face_df.insert(1,'on_boundary',False)
 
 
