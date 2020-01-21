@@ -1,12 +1,12 @@
 nx				80
 ny				80
-pos_noise 			0.
+pos_noise 			0.1
 rx 			13
 MF_low				0.1
 MF_high				1.
 MF_contract			0.8
 MF_relax			    1.
-t_mech				0.1
+t_mech				0.05
 t_f				    50
 y_dif				2
 y_dec				0.5
@@ -20,7 +20,6 @@ growth_control_by 		z_concentration
 int_cell_cycle			G
 amin 0.5
 amax 0.6
-gamma_G 0.1
-gamma_S 0.25
-dt 1
+gamma_G 0.2
+gamma_S 0.5
 boundary_tension 0.7

@@ -20,7 +20,6 @@ from tyssue.topology.sheet_topology import cell_division
 
 from numpy.linalg import eig, inv, pinv
 
-from scipy.stats import geom
 
 
 def fitEllipse(x,y):
@@ -62,7 +61,7 @@ def elipse_division_angle(sheet,cell_index):
     phi = ellipse_angle_of_rotation2(a)
     return phi+np.pi/2.
 
-def cell_GS(sheet,amin=0.5,amax=0.6,gamma_G=0.25,gamma_S=0.1,dt=1):
+def cell_GS(sheet,amin=0.5,amax=0.6,gamma_G=0.25,gamma_S=0.1,t_mech=1):
     for index,row in sheet.face_df.iterrows():
         if row['population_variable'] == 'A':
             if row['cell_cycle'] == 'G':
@@ -71,22 +70,23 @@ def cell_GS(sheet,amin=0.5,amax=0.6,gamma_G=0.25,gamma_S=0.1,dt=1):
                     sheet.face_df.at[index,'probability_GtoS'] = 0.0
                 elif row['area'] > amax:
                     #sheet.face_df.at[index,'probability_GtoS'] = (amax-amin)*gamma_G*dt/amin                                                         
-                    if  random.random()<=(amax-amin)*gamma_G*dt/amin  :
+                    if  random.random()<=(amax-amin)*gamma_G*t_mech/amin  :
                         #sheet.face_df.at[index,'prefered_area']=1.5                                                                                  
                         sheet.face_df.at[index,'cell_cycle'] = 'S'
+                        #grow the cell according to geometric distribution first, then divide it.
+                        p = gamma_S*t_mech
+                        sheet.face_df.at[index,'time_for_growth'] = np.random.geometric(p,size=1)[0]
                 else:
                     #print((amax-amin)*gamma_G*dt/amin)                                                                                               
                     #sheet.face_df.at[index,'probability_GtoS'] = (sheet.face_df.at[index,'area']-amin)*gamma_G*dt/amin                               
-                    if  random.random() <= (row['area']-amin)*gamma_G*dt/amin:
+                    if  random.random() <= (row['area']-amin)*gamma_G*t_mech/amin:
                         #sheet.face_df.at[index,'prefered_area']=1.5                                                                                  
                         sheet.face_df.at[index,'cell_cycle'] = 'S'
             elif row['cell_cycle'] == 'S':
                 #update the probability(in fact this part never changes)                                                                              
                 #sheet.face_df.at[index,'probability_div'] = gamma_S*dt                                                                               
                 #update the division
-                #grow the cell according to geometric distribution first, then divide it.
-                p = gamma_S*dt
-                sheet.face_df.at[index,'time_for_growth'] = geom(p)
+                
                 if row['time_in_growth'] < row['time_for_growth'] :
                     sheet.face_df.at[index,'prefered_area'] += 1/(sheet.face_df.at[index,'time_for_growth'])
                     sheet.face_df.at[index,'time_in_growth'] += 1
