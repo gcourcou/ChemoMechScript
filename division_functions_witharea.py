@@ -82,6 +82,8 @@ def cell_GS(sheet,amin=0.5,amax=0.6,gamma_G=0.25,gamma_S=0.1,t_mech=1):
                     if  random.random() <= (row['area']-amin)*gamma_G*t_mech/amin:
                         #sheet.face_df.at[index,'prefered_area']=1.5                                                                                  
                         sheet.face_df.at[index,'cell_cycle'] = 'S'
+                        p = gamma_S*t_mech
+                        sheet.face_df.at[index,'time_for_growth'] = np.random.geometric(p,size=1)[0]
             elif row['cell_cycle'] == 'S':
                 #update the probability(in fact this part never changes)                                                                              
                 #sheet.face_df.at[index,'probability_div'] = gamma_S*dt                                                                               
