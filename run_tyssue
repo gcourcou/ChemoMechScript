@@ -7,6 +7,6 @@ source /usr/usc/anaconda/3.2019.07/setup.sh
 conda init
 source activate first
 conda list
-python script_bcsource.py four
+python script_bcsource.py 6
 
 
