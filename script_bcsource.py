@@ -173,6 +173,7 @@ MF_relax = parameters["MF_relax"]
 
 # Steps=t_f/t_mech evalutation fo mf and div match
 t_mech = parameters["t_mech"]
+t_proliferation=parameters["t_proliferation"]
 t_f = parameters["t_f"]
 
 # Initialize parameters for equations
@@ -221,13 +222,13 @@ sheet.face_df.insert(1, "time_in_growth", 0)
 sheet.face_df.insert(1, "time_for_growth", 0)
 # sheet.face_df.insert(1,'on_boundary',False)
 
-
-# Obtain protein concentration, conver to numpy array and convert to normal list for iterator
-h0 = []
-for N_p, p_name in proteins.items():
-    h0 += sheet.face_df[p_name].to_numpy().tolist()
+# MOVED DOWN
+## Obtain protein concentration, conver to numpy array and convert to normal list for iterator
+#h0 = []
+#for N_p, p_name in proteins.items():
+#    h0 += sheet.face_df[p_name].to_numpy().tolist()
 # opposite face in the df
-sheet.get_opposite()
+#sheet.get_opposite()
 
 import numpy as np
 
@@ -409,16 +410,18 @@ def plot_chem(timer, chem_name, string):
 def plot_topology(timer, sheet):
     #
     # 1. frequency of number of sides
+    #sheet.face_df.shape[0]
     plt.figure()
     num_of_sides_values = sheet.face_df["num_sides"].value_counts().keys().tolist()
     num_of_sides_counts = sheet.face_df["num_sides"].value_counts().tolist()
+    num_of_sides_percentages=[100*item/sheet.face_df.shape[0] for item in num_of_sides_counts]
     plt.cla()
-    plt.bar(num_of_sides_values, num_of_sides_counts)
+    plt.bar(num_of_sides_values, num_of_sides_percentages)
     fig.set_size_inches(12, 5)
     plt.ylabel("Pn")
     plt.xlabel("number of sides")
     # plt.axis([0,40,0,0.8])
-    plt.title("cell numbers of different number of sides")
+    plt.title("cell percentages of different number of sides")
     plt.savefig("image" + "cellnumber_topology" + "{0:0=2d}".format(timer) + ".png")
     # plt.show()
     plt.close()
@@ -590,7 +593,9 @@ def chemo_mech_iterator(
     # derivative function returns n-value vector args (t,x)
     # plot_function should take only the step number as argument i.e. def visualization(step) : animate_cells2(step,"mech")
     steps = int(kwargs["t_f"]/kwargs["t_mech"])
-    for i in range(0, steps):
+    # only proliferation steps
+    steps_proliferation=int(kwargs["t_proliferation"]/kwargs["t_mech"])
+    for i in range(0+steps_proliferation, steps+steps_proliferation):
         print(i)
         # time evolve by one t_mech step
         mechanical_reaction(sheet)
@@ -630,6 +635,23 @@ def chemo_mech_iterator(
             script_data_stamp()
     return sol
 
+# only cell_grow and divide
+def proliferation(sheet,**kwargs):
+    steps=int(kwargs["t_proliferation"]/kwargs["t_mech"])
+    for i in range(0,steps):
+        mechanical_reaction(sheet)
+        cell_grow_and_divide(sheet)
+        solver.find_energy_min(sheet, geom, model)
+        visualization(i)
+    return
+
+proliferation(sheet,t_proliferation=t_proliferation,t_mech=t_mech)
+
+# Obtain protein concentration, conver to numpy array and convert to normal list for iterator
+h0 = []
+for N_p, p_name in proteins.items():
+    h0 += sheet.face_df[p_name].to_numpy().tolist()
+sheet.get_opposite()
 
 sol = chemo_mech_iterator(
     sheet,
@@ -642,6 +664,7 @@ sol = chemo_mech_iterator(
     stamp=20,
     t_mech=t_mech,
     t_f=t_f,
+    t_proliferation=t_proliferation,
     N_protein_types=0,
 )
 
