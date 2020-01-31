@@ -53,6 +53,7 @@ def script_data_stamp():
     script_data["total real time"] = total_time
     script_data["cell number"] = store_cell_number
     script_data["tissue area"] = store_tissue_area
+    script_data["cell ave area"] = store_cell_ave_area
     script_data["mitosis index"] = store_mitosis_index
     script_data["MF position"] = store_MF_position
     script_data["Mech Timer"] = store_mech_timer
@@ -552,13 +553,15 @@ def cell_grow_and_divide(tyssue):
 
 store_cell_number = []
 store_tissue_area=[]
+store_cell_ave_area=[]
 store_mitosis_index=[]
 store_MF_position = []
 store_mech_timer = []
 
-def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_position, mech_timer):
+def data_collection(i, tyssue, cell_number, tissue_area, cell_ave_area, mitosis_index, MF_position, mech_timer):
     cell_number += [tyssue.face_df.shape[0]]
     tissue_area +=[tyssue.face_df['area'].sum()]
+    cell_ave_area +=[tyssue.face_df['area'].mean()]
     s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
     mitosis_index +=[np.sum(s_arr) /tyssue.face_df.shape[0] ]
     x_y_array = np.array(
@@ -630,7 +633,7 @@ def chemo_mech_iterator(
         if kwargs["plot"] == True:
             visualization(i)
         # data collection
-        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer)
+        data_collection(i, sheet, store_cell_number, store_tissue_area, store_cell_ave_area, store_mitosis_index, store_MF_position, store_mech_timer)
         if (i%int(kwargs["stamp"]))==0:
             script_data_stamp()
     return sol
