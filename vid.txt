@@ -1,0 +1,13 @@
+ffmpeg -r 1 -f image2 -s 1920x1080 -i imagemechy_concentration%02d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p Hh_tissue.mp4
+
+ffmpeg -r 1 -f image2 -s 1920x1080 -i imagecellarea_topology%02d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p Dpp_x.mp4
+
+ffmpeg -r 1 -f image2 -s 1920x1080 -i imageMFvsxy_concentration%02d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p Hh_x.mp4
+
+ffmpeg -r 1 -f image2 -s 1920x1080 -i imageMFy_concentration%02d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p MF_tissue.mp4
+
+ffmpeg -r 1 -f image2 -s 1920x1080 -i imageareavsxarea%02d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p area.mp4
+
+ffmpeg -r 1 -f image2 -s 1920x1080 -i imageSfreqvsx%02d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p stateMhist.mp4
+
+ffmpeg -r 1 -f image2 -s 1920x1080 -i imagecellnumber_topology%02d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p Dpp_tissue.mp4
