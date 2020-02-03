@@ -416,7 +416,16 @@ def plot_topology(timer, sheet):
     num_of_sides_counts = sheet.face_df["num_sides"].value_counts().tolist()
     num_of_sides_percentages=[100*item/sheet.face_df.shape[0] for item in num_of_sides_counts]
     plt.cla()
-    plt.bar(num_of_sides_values, num_of_sides_percentages)
+    plt.bar(num_of_sides_values, num_of_sides_percentages, width = '0.25', color = 'c', align = 'edge')
+    
+    width = 0.25
+    #experimental data
+    xlist = [3-0.5*width, 4-0.5*width, 5-0.5*width, 6-0.5*width, 7-0.5*width, 8-0.5*width, 9-0.5*width]
+    ylist = [1.00, 6.78, 34.61, 38.28, 14.28, 2.17, 0.06]
+    errorlist = [0.77, 4.176, 4.06, 6.29, 3.36, 1.76, 0.24]
+    plt.bar(xlist, ylist, width = 0.25, align = 'center')
+    plt.errorbar(xlist, ylist, yerr = errorlist, fmt = 'o', color = 'k')
+    
     fig.set_size_inches(12, 5)
     plt.ylabel("Pn")
     plt.xlabel("number of sides")
@@ -425,6 +434,8 @@ def plot_topology(timer, sheet):
     plt.savefig("image" + "cellnumber_topology" + "{0:0=2d}".format(timer) + ".png")
     # plt.show()
     plt.close()
+    
+    
     # 2. average area vs number of sides
     # moved this outsdide function since it should by called once
     # sheet.face_df.insert(1,'rlarea',0.0)
@@ -435,9 +446,14 @@ def plot_topology(timer, sheet):
     rlarea_mean_dif_sides = sheet.face_df.groupby(["num_sides"])["rlarea"].mean()
 
     plt.cla()
-
+    # input experimental data
+    xlist_area = [3, 4, 5, 6, 7, 8]
+    ylist_area = [0.42, 0.56, 0.82, 1.08, 1.36, 1.52]
+    errorlist_area = [0.144, 0.02, 0.01,0.01, 0.02, 0.05]
     # print(rlarea_mean_dif_sides)
-    plt.plot(rlarea_mean_dif_sides, marker="o")
+    plt.plot(rlarea_mean_dif_sides, marker="o", color = 'c')
+    plt.plot(xlist_area, ylist_area, marker = "o")
+    plt.errorbar(xlist_area, ylist_area, yerr = errorlist_area, fmt = 'o', color = 'k')
     fig.set_size_inches(12, 5)
 
     plt.ylabel("<An>/<A>")
