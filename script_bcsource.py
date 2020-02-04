@@ -416,15 +416,23 @@ def plot_topology(timer, sheet):
     num_of_sides_counts = sheet.face_df["num_sides"].value_counts().tolist()
     num_of_sides_percentages=[100*item/sheet.face_df.shape[0] for item in num_of_sides_counts]
     plt.cla()
-    plt.bar(num_of_sides_values, num_of_sides_percentages, width = 0.25, color = 'c', align = 'edge')
+    plt.bar(num_of_sides_values, num_of_sides_percentages, label = 'our data', width = 0.15, color = 'c', align = 'center')
     
-    width = 0.25
+    width = 0.15
     #experimental data
-    xlist = [3-0.5*width, 4-0.5*width, 5-0.5*width, 6-0.5*width, 7-0.5*width, 8-0.5*width, 9-0.5*width]
+    xlist = [3-width, 4-width, 5-width, 6-width, 7-width, 8-width, 9-width]
     ylist = [1.00, 6.78, 34.61, 38.28, 14.28, 2.17, 0.06]
     errorlist = [0.77, 4.176, 4.06, 6.29, 3.36, 1.76, 0.24]
-    plt.bar(xlist, ylist, width = 0.25, align = 'center')
+    plt.bar(xlist, ylist, label = 'wing disc data', width = 0.15, color = 'r', align = 'center')
     plt.errorbar(xlist, ylist, yerr = errorlist, fmt = 'o', color = 'k')
+    
+    #Farhadifar data
+    xlist1 = [3+width, 4+width, 5+width, 6+width, 7+width, 8+width, 9+width]
+    ylist1 = [0.11, 11.29, 32.10, 28.39, 16.79, 7.31, 4.02]
+    plt.bar(xlist1, ylist1, label = 'Farhadifar data', width = 0.15, color = 'g', align = 'center')
+    
+    #legend
+    plt.legend(loc ='upper left')
     
     fig.set_size_inches(12, 5)
     plt.ylabel("Pn")
@@ -450,10 +458,17 @@ def plot_topology(timer, sheet):
     xlist_area = [3, 4, 5, 6, 7, 8]
     ylist_area = [0.42, 0.56, 0.82, 1.08, 1.36, 1.52]
     errorlist_area = [0.144, 0.02, 0.01,0.01, 0.02, 0.05]
+    # input Farhadifar data
+    ylist1_area = [0.05, 0.42, 0.80, 1.08, 1.30, 1.47]
     # print(rlarea_mean_dif_sides)
-    plt.plot(rlarea_mean_dif_sides, marker="o", color = 'c')
-    plt.plot(xlist_area, ylist_area, marker = "o")
+    plt.plot(rlarea_mean_dif_sides, label = 'our data', marker="o", color = 'c')
+    plt.plot(xlist_area, ylist_area, label = 'wing disc data', marker = "o", color = 'r')
+    plt.plot(xlist_area, ylist1_area, label = 'Farhadifar data', marker = "o", color = 'g')
     plt.errorbar(xlist_area, ylist_area, yerr = errorlist_area, fmt = 'o', color = 'k')
+    
+    #legend
+    plt.legend(loc ='upper left')
+    
     fig.set_size_inches(12, 5)
 
     plt.ylabel("<An>/<A>")
