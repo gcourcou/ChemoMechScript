@@ -416,7 +416,7 @@ def plot_topology(timer, sheet):
     num_of_sides_counts = sheet.face_df["num_sides"].value_counts().tolist()
     num_of_sides_percentages=[100*item/sheet.face_df.shape[0] for item in num_of_sides_counts]
     plt.cla()
-    plt.bar(num_of_sides_values, num_of_sides_percentages, width = '0.25', color = 'c', align = 'edge')
+    plt.bar(num_of_sides_values, num_of_sides_percentages, width = 0.25, color = 'c', align = 'edge')
     
     width = 0.25
     #experimental data
