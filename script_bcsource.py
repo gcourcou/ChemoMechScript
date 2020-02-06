@@ -432,7 +432,7 @@ def plot_topology(timer, sheet):
     plt.bar(xlist1, ylist1, label = 'Farhadifar data', width = 0.15, color = 'g', align = 'center')
     
     #legend
-    plt.legend(loc ='upper left')
+    plt.legend(loc ='upper right')
     
     fig.set_size_inches(12, 5)
     plt.ylabel("Pn")
@@ -467,7 +467,7 @@ def plot_topology(timer, sheet):
     plt.errorbar(xlist_area, ylist_area, yerr = errorlist_area, fmt = 'o', color = 'k')
     
     #legend
-    plt.legend(loc ='upper left')
+    plt.legend(loc ='upper right')
     
     fig.set_size_inches(12, 5)
 
