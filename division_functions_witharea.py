@@ -66,7 +66,7 @@ def cell_GS(sheet,amin=0.5,amax=0.6,gamma_G=0.25,gamma_S=0.1,t_mech=1):
         if row['population_variable'] == 'A':
             if row['cell_cycle'] == 'G':
                 #update the probability                                                                                                               
-                if row['area'] < amin or row['num_sides']<5:
+                if row['area'] < amin :
                     sheet.face_df.at[index,'probability_GtoS'] = 0.0
                 elif row['area'] > amax:
                     #sheet.face_df.at[index,'probability_GtoS'] = (amax-amin)*gamma_G*dt/amin                                                         
