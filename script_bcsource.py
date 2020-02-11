@@ -415,8 +415,26 @@ def plot_topology(timer, sheet):
     num_of_sides_values = sheet.face_df["num_sides"].value_counts().keys().tolist()
     num_of_sides_counts = sheet.face_df["num_sides"].value_counts().tolist()
     num_of_sides_percentages=[100*item/sheet.face_df.shape[0] for item in num_of_sides_counts]
+    xlist_our = []
+    ylist_our = []
+    addper = 0.0
+    k = 0
+    for i in range(0, len(num_of_sides_values)):
+        if num_of_sides_values[i] <= 9:
+            xlist_our.append(num_of_sides_values[i])
+            ylist_our.append(num_of_sides_percentages[i])
+        else:
+            addper += num_of_sides_percentages[i]
+    for i in range(0, len(xlist_our)):
+        if xlist_our[i] == 9:
+            ylist_our[i] += addper
+        else:
+            k += 1
+    if k == len(xlist_our):
+        xlist_our.append(9)
+        ylist_our.append(addper)
     plt.cla()
-    plt.bar(num_of_sides_values, num_of_sides_percentages, label = 'our data', width = 0.15, color = 'c', align = 'center')
+    plt.bar(xlist_our, ylist_our, label = 'our data', width = 0.15, color = 'c', align = 'center')
     
     width = 0.15
     #experimental data
@@ -452,7 +470,6 @@ def plot_topology(timer, sheet):
             sheet.face_df.at[index, "area"] / sheet.face_df["area"].mean()
         )
     rlarea_mean_dif_sides = sheet.face_df.groupby(["num_sides"])["rlarea"].mean()
-
     plt.cla()
     # input experimental data
     xlist_area = [3, 4, 5, 6, 7, 8]
@@ -460,8 +477,17 @@ def plot_topology(timer, sheet):
     errorlist_area = [0.144, 0.02, 0.01,0.01, 0.02, 0.05]
     # input Farhadifar data
     ylist1_area = [0.05, 0.42, 0.80, 1.08, 1.30, 1.47]
+    
+    ylist_area_our = [0.0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0]
+    for i in rlarea_mean_dif_sides.index:
+        if i <= 8:
+            for j in range(0, len(xlist_area)):
+                if xlist_area[j] == i:
+                    ylist_area_our[j] += rlarea_mean_dif_sides[i]
+        else:
+            ylist_area_our[5] += rlarea_mean_dif_sides[i]
     # print(rlarea_mean_dif_sides)
-    plt.plot(rlarea_mean_dif_sides, label = 'our data', marker="o", color = 'c')
+    plt.plot(xlist_area, ylist_area_our label = 'our data', marker="o", color = 'c')
     plt.plot(xlist_area, ylist_area, label = 'wing disc data', marker = "o", color = 'r')
     plt.plot(xlist_area, ylist1_area, label = 'Farhadifar data', marker = "o", color = 'g')
     plt.errorbar(xlist_area, ylist_area, yerr = errorlist_area, fmt = 'o', color = 'k')
