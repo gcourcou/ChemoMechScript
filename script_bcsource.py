@@ -487,7 +487,7 @@ def plot_topology(timer, sheet):
         else:
             ylist_area_our[5] += rlarea_mean_dif_sides[i]
     # print(rlarea_mean_dif_sides)
-    plt.plot(xlist_area, ylist_area_our label = 'our data', marker="o", color = 'c')
+    plt.plot(xlist_area, ylist_area_our, label = 'our data', marker="o", color = 'c')
     plt.plot(xlist_area, ylist_area, label = 'wing disc data', marker = "o", color = 'r')
     plt.plot(xlist_area, ylist1_area, label = 'Farhadifar data', marker = "o", color = 'g')
     plt.errorbar(xlist_area, ylist_area, yerr = errorlist_area, fmt = 'o', color = 'k')
