@@ -478,16 +478,17 @@ def plot_topology(timer, sheet):
     # input Farhadifar data
     ylist1_area = [0.05, 0.42, 0.80, 1.08, 1.30, 1.47]
     
-    ylist_area_our = [0.0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0]
-    for i in rlarea_mean_dif_sides.index:
+    temp = rlarea_mean_dif_sides.sort_index(axis=0)
+    xlist_area_our = list()
+    ylist_area_our = list()
+    for i in temp.index:
         if i <= 8:
-            for j in range(0, len(xlist_area)):
-                if xlist_area[j] == i:
-                    ylist_area_our[j] += rlarea_mean_dif_sides[i]
-        else:
-            ylist_area_our[5] += rlarea_mean_dif_sides[i]
+            xlist_area_our.append(i)
+            ylist_area_our.append(temp[i])
+    
+        
     # print(rlarea_mean_dif_sides)
-    plt.plot(xlist_area, ylist_area_our, label = 'our data', marker="o", color = 'c')
+    plt.plot(xlist_area_our, ylist_area_our, label = 'our data', marker="o", color = 'c')
     plt.plot(xlist_area, ylist_area, label = 'wing disc data', marker = "o", color = 'r')
     plt.plot(xlist_area, ylist1_area, label = 'Farhadifar data', marker = "o", color = 'g')
     plt.errorbar(xlist_area, ylist_area, yerr = errorlist_area, fmt = 'o', color = 'k')
