@@ -447,6 +447,10 @@ def plot_topology(timer, sheet):
     #Farhadifar data
     xlist1 = [3+width, 4+width, 5+width, 6+width, 7+width, 8+width, 9+width]
     ylist1 = [0.11, 11.29, 32.10, 28.39, 16.79, 7.31, 4.02]
+    
+    my_x = [3,4,5,6,7,8,'9+']
+    plt.xticks(xlist1, my_x)
+
     plt.bar(xlist1, ylist1, label = 'Farhadifar data', width = 0.15, color = 'g', align = 'center')
     
     #legend
@@ -488,9 +492,13 @@ def plot_topology(timer, sheet):
     
         
     # print(rlarea_mean_dif_sides)
-    plt.plot(xlist_area_our, ylist_area_our, label = 'our data', marker="o", color = 'c')
+    my_x = [3,4,5,6,7,'8+']
+    plt.xticks(xlist_area, my_x)
+
+    
     plt.plot(xlist_area, ylist_area, label = 'wing disc data', marker = "o", color = 'r')
     plt.plot(xlist_area, ylist1_area, label = 'Farhadifar data', marker = "o", color = 'g')
+    plt.plot(xlist_area_our, ylist_area_our, label = 'our data', marker="o", color = 'c')
     plt.errorbar(xlist_area, ylist_area, yerr = errorlist_area, fmt = 'o', color = 'k')
     
     #legend
