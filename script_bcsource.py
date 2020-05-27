@@ -1,6 +1,9 @@
 # to make this file #plt.show() was replaced with ##plt.show()
 # use agg backend matplotlib.use('Agg')
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
+import sys
+sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
+
 
 import time
 
@@ -138,6 +141,8 @@ color_cmap = cmap(sheet.face_df.col)
 draw_specs["face"]["visible"] = True
 draw_specs["face"]["color"] = color_cmap
 draw_specs["face"]["alpha"] = 0.5
+draw_specs["axis"]={"autoscale" : False,"x_min":20,"x_max":60,"y_min":10,"y_max":70 }
+print(draw_specs)
 fig, ax = sheet_view(sheet, coords, **draw_specs)
 fig.set_size_inches(7, 6)
 # plt.show()
@@ -175,6 +180,7 @@ MF_relax = parameters["MF_relax"]
 t_mech = parameters["t_mech"]
 t_proliferation=parameters["t_proliferation"]
 t_f = parameters["t_f"]
+t_plot = parameters["t_plot"]
 
 # Initialize parameters for equations
 y_dif = parameters["y_dif"]
@@ -398,8 +404,23 @@ def plot_chem(timer, chem_name, string):
     for item in x_y_array:
         if val - 1.0 < item[1] < val + 1.0:
             x_y_ref.append(item)
-    plt.plot([i[0] for i in x_y_ref], [i[2] for i in x_y_ref], "rx")
+    #plt.plot([i[0] for i in x_y_ref], [i[2] for i in x_y_ref], "rx")
+    
+    bin_N=10
+    average_chem=[ [0] for i in range(0,bin_N)]
+    Range = (sheet.face_df["x"].max() - sheet.face_df["x"].min())
+    bin_size = Range/bin_N
+    minimum_x = sheet.face_df["x"].min() 
+    bin_x = [ minimum_x+bin_size*i for i in range(0,bin_N)  ]
+    for item in x_y_array:
+        for i in range(0,bin_N):
+            if minimum_x+bin_size*i < item[0] <= minimum_x+bin_size*(i+1):
+                average_chem[i]+= [item[2]]
+    for i in range(0,bin_N):
+        average_chem[i]=np.average(average_chem[i])
 
+    plt.plot(bin_x, average_chem, "rx") 
+    
     plt.title(chem_name + " vs A-P position " + str(timer) + "centered " + str(val))
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png")
     # plt.axis('off')
@@ -600,6 +621,7 @@ def chemo_mech_iterator(
         # time evolve by one t_mech step
         mechanical_reaction(sheet)
         # reaction diffusion
+        #print(auto_prod_mag)
         sol = solve_ivp(
             derivative_function,
             [kwargs["t_mech"] * i, kwargs["t_mech"] * (i + 1)],
@@ -627,8 +649,8 @@ def chemo_mech_iterator(
         # necessary if mech part changes chem part
         for N_p, p_name in proteins.items():
             initial_concentration += sheet.face_df[p_name].to_numpy().tolist()
-        if kwargs["plot"] == True:
-            visualization(i)
+        if kwargs["plot"] == True and i%t_plot==0:
+            visualization(int(i/t_plot))
         # data collection
         data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer)
         if (i%int(kwargs["stamp"]))==0:
@@ -642,10 +664,11 @@ def proliferation(sheet,**kwargs):
         mechanical_reaction(sheet)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
-        visualization(i)
+        if kwargs["plot"] == True and i%t_plot==0:
+            visualization( int(i/t_plot) )
     return
 
-proliferation(sheet,t_proliferation=t_proliferation,t_mech=t_mech)
+proliferation(sheet,t_proliferation=t_proliferation,t_mech=t_mech,plot=True)
 
 # Obtain protein concentration, conver to numpy array and convert to normal list for iterator
 h0 = []
