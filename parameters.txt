@@ -8,7 +8,7 @@ MF_contract			0.7
 MF_relax			1.
 t_mech				0.05
 t_f				50
-t_proliferation			10    
+t_proliferation			0.5    
 t_plot				10
 y_dif				1
 y_dec				0.5
@@ -20,3 +20,5 @@ amax 0.6
 gamma_G 0.2
 gamma_S 0.5
 boundary_tension 0.7
+proliferation_type		uniform
+long_axis_div			False

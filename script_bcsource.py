@@ -28,7 +28,7 @@ from tyssue.topology.sheet_topology import remove_face, cell_division
 from scipy.spatial import Voronoi
 from tyssue.config.geometry import planar_spec
 from tyssue.generation import hexa_grid2d, from_2d_voronoi
-from division_functions_witharea import cell_GS
+#from division_functions_witharea import cell_GS
 from itertools import count
 from tyssue.io import hdf5
 
@@ -75,6 +75,17 @@ with open("parameters.txt") as f:
             parameters[str(key)] = float(val)
         except:
             parameters[str(key)] = str(val)
+
+
+proliferation_type = parameters["proliferation_type"]
+#long_axis_div      = parameters["long_axis_div"]
+print(proliferation_type)
+#print(long_axis_div)
+#choose your mode                                                                                                                             
+if proliferation_type=="area":
+    from division_functions_aegerter import cell_Aegerter_area as cell_GS
+elif proliferation_type=="uniform":
+    from division_functions_aegerter import cell_Aegerter_uni  as cell_GS
 
 # output data management
 #import os
@@ -225,7 +236,13 @@ sheet.face_df.insert(1, "time_in_cycle", 0)
 sheet.face_df.insert(1, "population_variable", "P")
 
 sheet.face_df.insert(1, "time_in_growth", 0)
-sheet.face_df.insert(1, "time_for_growth", 0)
+#sheet.face_df.insert(1, "time_for_growth", 0)
+
+# Initialize params for aegerter growth
+sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
+sheet.face_df.insert(1, "time_for_growth", 0.5)
+
+
 # sheet.face_df.insert(1,'on_boundary',False)
 
 # MOVED DOWN
@@ -550,7 +567,8 @@ def mechanical_reaction(tyssue):
 def cell_grow_and_divide(tyssue):
     # cell_growth_and_division_2D(tyssue, 0.5, 3, 4, 3, string='y_concentration')
     # cell_growth_and_division_2D(tyssue, 0.5, 3*2, 4*2, 3, string='z_concentration')
-    cell_GS(tyssue, amin, amax, gamma_G, gamma_S, t_mech)
+    #cell_GS(tyssue, amin, amax, gamma_G, gamma_S, t_mech)
+    cell_GS(sheet,1.,0.04,0.5,long_axis_div=False)
     tri_faces = sheet.face_df[sheet.face_df["num_sides"] < 4].index
 
     cells = sheet.face_df.shape[0]
