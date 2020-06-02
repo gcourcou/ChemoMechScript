@@ -59,6 +59,8 @@ def script_data_stamp():
     script_data["mitosis index"] = store_mitosis_index
     script_data["MF position"] = store_MF_position
     script_data["Mech Timer"] = store_mech_timer
+    script_data["mitotic position"] = store_mitotic_position
+    script_data["L"] = store_tissue_length
     f = open("script_out.txt", "w")
     f.write(str(script_data))
     f.close()
@@ -152,7 +154,7 @@ color_cmap = cmap(sheet.face_df.col)
 draw_specs["face"]["visible"] = True
 draw_specs["face"]["color"] = color_cmap
 draw_specs["face"]["alpha"] = 0.5
-draw_specs["axis"]={"autoscale" : False,"x_min":20,"x_max":60,"y_min":10,"y_max":70 }
+draw_specs["axis"]={"autoscale" : False,"x_min":-30,"x_max":80,"y_min":-60,"y_max":120 }
 print(draw_specs)
 fig, ax = sheet_view(sheet, coords, **draw_specs)
 fig.set_size_inches(7, 6)
@@ -350,7 +352,7 @@ def animate_cells2(timer, chem_name, string):
     fig.set_size_inches(6, 6)
     fig.suptitle(chem_name + " frame " + str(timer), fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
-    plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png")
+    plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
     # plt.axis('off')
     # plt.show()
     plt.close()
@@ -380,7 +382,7 @@ def animate_cells_MF(timer, chem_name, string):
     fig.set_size_inches(6, 6)
     fig.suptitle("MF " + str(timer), fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
-    plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png")
+    plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
     # plt.axis('off')
     # plt.show()
     plt.close()
@@ -562,13 +564,16 @@ def mechanical_reaction(tyssue):
             sheet.face_df.at[index, "population_variable"] = "P"
     # z_auto
 
-
+#store_mitotic_position_temp=[]
 # cell_growth_and_division_2D(sheet_2D_test, alpha_c, t_M_mean, t_I_mean, m, string='c_dpp'):
 def cell_grow_and_divide(tyssue):
+    global store_mitotic_position
     # cell_growth_and_division_2D(tyssue, 0.5, 3, 4, 3, string='y_concentration')
     # cell_growth_and_division_2D(tyssue, 0.5, 3*2, 4*2, 3, string='z_concentration')
     #cell_GS(tyssue, amin, amax, gamma_G, gamma_S, t_mech)
-    cell_GS(sheet,1.,0.04,0.5,long_axis_div=False)
+    mitotic_shape, mitotic_position = cell_GS(sheet,1.,0.04,0.5,long_axis_div=False)
+    # store division position relative to MF
+    store_mitotic_position+=[mitotic_position]
     tri_faces = sheet.face_df[sheet.face_df["num_sides"] < 4].index
 
     cells = sheet.face_df.shape[0]
@@ -594,8 +599,11 @@ store_tissue_area=[]
 store_mitosis_index=[]
 store_MF_position = []
 store_mech_timer = []
+# in cell grow and divide
+store_mitotic_position = []
+store_tissue_length = []
 
-def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_position, mech_timer):
+def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length):
     cell_number += [tyssue.face_df.shape[0]]
     tissue_area +=[tyssue.face_df['area'].sum()]
     s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
@@ -617,7 +625,7 @@ def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_positi
     else:
         MF_position += [MF_mean_xpos]
     mech_timer += [i * t_mech]
-
+    tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
 
 def chemo_mech_iterator(
     sheet,
@@ -670,7 +678,7 @@ def chemo_mech_iterator(
         if kwargs["plot"] == True and i%t_plot==0:
             visualization(int(i/t_plot))
         # data collection
-        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer)
+        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
         if (i%int(kwargs["stamp"]))==0:
             script_data_stamp()
     return sol
@@ -684,6 +692,7 @@ def proliferation(sheet,**kwargs):
         solver.find_energy_min(sheet, geom, model)
         if kwargs["plot"] == True and i%t_plot==0:
             visualization( int(i/t_plot) )
+        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
     return
 
 proliferation(sheet,t_proliferation=t_proliferation,t_mech=t_mech,plot=True)
