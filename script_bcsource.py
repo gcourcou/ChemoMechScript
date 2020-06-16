@@ -83,11 +83,27 @@ proliferation_type = parameters["proliferation_type"]
 #long_axis_div      = parameters["long_axis_div"]
 print(proliferation_type)
 #print(long_axis_div)
-#choose your mode                                                                                                                             
+
+# choose yourr mode
+
+# conversion_r = pixels/micrometer
+# conversion_t = s/t_mech
+#1100.596923908011
+#687.4683737855494 incorrect conversion
+#1181.3627550441906 objective MF speed
+#915.3565322296259 Lposterior fit vs t_mech
 if proliferation_type=="area":
     from division_functions_aegerter import cell_Aegerter_area as cell_GS
+    def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+        value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.015*(1/conversion_t))
+        print(value)
+        return value
 elif proliferation_type=="uniform":
     from division_functions_aegerter import cell_Aegerter_uni  as cell_GS
+    def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+        value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.018*(1/conversion_t))
+        print(value)
+        return value
 
 # output data management
 #import os
@@ -96,7 +112,8 @@ elif proliferation_type=="uniform":
 attempt = sys.argv[1]
 name = "out_" + str(attempt)
 os.makedirs(name, exist_ok=True)
-os.chdir(name)
+#moved after import
+#os.chdir(name)
 #################
 
 
@@ -106,10 +123,19 @@ nx = parameters["nx"]
 ny = parameters["ny"] + 1
 pos_noise = parameters["pos_noise"]
 
-sheet = Sheet.planar_sheet_2d(
-    "basic2D", nx=int(nx), ny=int(ny), distx=1, disty=1, noise=pos_noise
-)
-
+previously_grown_eye=True
+if previously_grown_eye==True:
+    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    dsets = hdf5.load_datasets(os.path.join(__location__,"realistic_tissue.hf5") )
+    #dsets = hdf5.load_datasets("./"+load_dir+'/sheet.hf5')
+    specs = config.geometry.planar_sheet()
+    sheet = Sheet('periodic', dsets, specs)
+else:
+    sheet = Sheet.planar_sheet_2d(
+        "basic2D", nx=int(nx), ny=int(ny), distx=1, disty=1, noise=pos_noise
+        )
+# after loading tyssue i go to res dir for outputs
+os.chdir(name) 
 # Ellipse!
 rx = parameters["rx"]
 sigma = 172.0 / 74.0
@@ -235,15 +261,16 @@ cell_vars = {
 int_cell_cycle = parameters["int_cell_cycle"]
 sheet.face_df["cell_cycle"] = int_cell_cycle
 sheet.face_df.insert(1, "time_in_cycle", 0)
-sheet.face_df.insert(1, "population_variable", "P")
 
+# loading file causes error so equal is better
+#sheet.face_df.insert(1, "population_variable", "P")
+sheet.face_df["population_variable"]=["P" for i in range(0,sheet.face_df.shape[0])]
 sheet.face_df.insert(1, "time_in_growth", 0)
 #sheet.face_df.insert(1, "time_for_growth", 0)
 
 # Initialize params for aegerter growth
 sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
-sheet.face_df.insert(1, "time_for_growth", 0.5)
-
+sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
 
 # sheet.face_df.insert(1,'on_boundary',False)
 
@@ -526,7 +553,7 @@ def visualization(i):
     animate_cells_MF(i, "y_concentration", "MF")
     plot_chem(i, "y_concentration", "MFvsx")
     plot_chem(i, "area", "areavsx")
-    animate_cells_stateS(i, "Sfreqvsx")
+    #animate_cells_stateS(i, "Sfreqvsx")
     plot_topology(i, sheet)
 
 
@@ -571,7 +598,13 @@ def cell_grow_and_divide(tyssue):
     # cell_growth_and_division_2D(tyssue, 0.5, 3, 4, 3, string='y_concentration')
     # cell_growth_and_division_2D(tyssue, 0.5, 3*2, 4*2, 3, string='z_concentration')
     #cell_GS(tyssue, amin, amax, gamma_G, gamma_S, t_mech)
-    mitotic_shape, mitotic_position = cell_GS(sheet,1.,0.04,0.5,long_axis_div=False)
+    if store_MF_position[-1]==0:
+        #PL=store_tissue_length[-1][0]-store_tissue_length[-1][1]
+        PL=0.0
+    else :
+        #PL=store_MF_position[-1]-store_tissue_length[-1][1]
+        PL=store_tissue_length[-1][0]-store_MF_position[-1]
+    mitotic_shape, mitotic_position = cell_GS(sheet,1.,0.04,0.5,f_alpha(PL),long_axis_div=False)
     # store division position relative to MF
     store_mitotic_position+=[mitotic_position]
     tri_faces = sheet.face_df[sheet.face_df["num_sides"] < 4].index
@@ -623,9 +656,29 @@ def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_positi
     if np.isnan(MF_mean_xpos):
         MF_position += [0.0]
     else:
+        # MF position is defined as the x position of the MF cells at the midpoint of the eye disc
         MF_position += [MF_mean_xpos]
     mech_timer += [i * t_mech]
-    tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
+    #  newer way to get L 
+
+    x_y_array = np.array(
+        [
+            [row["x"], row["y"], row["on_boundary"] == True]
+            for index, row in tyssue.face_df.iterrows()
+        ]
+    )
+    x_y_ref = []
+    #val = (tyssue.face_df["y"].max() + tyssue.face_df["y"].min()) / 2.0
+    for item in x_y_array:
+        if val - 1.0 < item[1] < val + 1.0 and item[2] == True:
+            x_y_ref.append(item[0])
+    Lmax=max(x_y_ref)
+    print("LMAX " + str(Lmax) )
+    Lmin=min(x_y_ref)
+    print("LMIN " + str(Lmin) )
+    tissue_length += [ [Lmax,Lmin]  ]
+    # depreciated
+    #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
 
 def chemo_mech_iterator(
     sheet,
@@ -665,7 +718,9 @@ def chemo_mech_iterator(
             if row["opposite"] == -1:
                 face_id = row["face"]
                 sheet.face_df.at[face_id, "on_boundary"] = True
-
+        
+        
+        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
 
@@ -677,8 +732,8 @@ def chemo_mech_iterator(
             initial_concentration += sheet.face_df[p_name].to_numpy().tolist()
         if kwargs["plot"] == True and i%t_plot==0:
             visualization(int(i/t_plot))
-        # data collection
-        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
+        # data collection moved before cell_grow since i use the store arrays for my growth rate
+        #data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
         if (i%int(kwargs["stamp"]))==0:
             script_data_stamp()
     return sol
@@ -688,11 +743,14 @@ def proliferation(sheet,**kwargs):
     steps=int(kwargs["t_proliferation"]/kwargs["t_mech"])
     for i in range(0,steps):
         mechanical_reaction(sheet)
+        # moved data_collection up since i use info from data for cell growthh
+        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
         if kwargs["plot"] == True and i%t_plot==0:
             visualization( int(i/t_plot) )
-        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
+        # data collection moved before cell_grow since i use the store arrays for my growth rate  
+        #data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length) 
     return
 
 proliferation(sheet,t_proliferation=t_proliferation,t_mech=t_mech,plot=True)

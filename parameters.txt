@@ -1,14 +1,14 @@
 nx				80
 ny				80
 pos_noise 			0.1
-rx 				13
+rx 				8.5
 MF_low				0.1
 MF_high				1.
 MF_contract			0.7
 MF_relax			1.
 t_mech				0.2
 t_f				50
-t_proliferation			4    
+t_proliferation			0    
 t_plot				10
 y_dif				1
 y_dec				0.5
