@@ -103,7 +103,7 @@ if proliferation_type=="area":
             return value
     elif proliferation_time_dependent=="no":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-            value=1
+            value=parameters["proliferation_magnitude"]
             print(value)
             return value        
 elif proliferation_type=="uniform":
@@ -115,7 +115,7 @@ elif proliferation_type=="uniform":
             return value
     elif proliferation_time_dependent=="no":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-            value=1
+            value=parameters["proliferation_magnitude"]
             print(value)
             return value
 
