@@ -83,7 +83,8 @@ proliferation_type = parameters["proliferation_type"]
 #long_axis_div      = parameters["long_axis_div"]
 print(proliferation_type)
 #print(long_axis_div)
-
+proliferation_time_dependent = parameters["proliferation_time_dependent"]
+print(proliferation_time_dependent)
 # choose yourr mode
 
 # conversion_r = pixels/micrometer
@@ -91,19 +92,32 @@ print(proliferation_type)
 #1100.596923908011
 #687.4683737855494 incorrect conversion
 #1181.3627550441906 objective MF speed
-#915.3565322296259 Lposterior fit vs t_mech
+#_5 915.3565322296259 Lposterior fit vs t_mech
+#_6 874.0061531374303 Lposterior fit vs t_mech noticed that MF speed is time dependent
 if proliferation_type=="area":
     from division_functions_aegerter import cell_Aegerter_area as cell_GS
-    def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-        value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.015*(1/conversion_t))
-        print(value)
-        return value
+    if proliferation_time_dependent=="exponential":
+        def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.015*(1/conversion_t))
+            print(value)
+            return value
+    elif proliferation_time_dependent=="no":
+        def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            value=1
+            print(value)
+            return value        
 elif proliferation_type=="uniform":
     from division_functions_aegerter import cell_Aegerter_uni  as cell_GS
-    def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-        value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.018*(1/conversion_t))
-        print(value)
-        return value
+    if proliferation_time_dependent=="exponential":
+        def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.018*(1/conversion_t))
+            print(value)
+            return value
+    elif proliferation_time_dependent=="no":
+        def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            value=1
+            print(value)
+            return value
 
 # output data management
 #import os
