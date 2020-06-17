@@ -22,4 +22,5 @@ gamma_S 0.5
 boundary_tension 0.7
 proliferation_type		uniform
 proliferation_time_dependent    exponential
+proliferation_magnitude		1
 long_axis_div			False
