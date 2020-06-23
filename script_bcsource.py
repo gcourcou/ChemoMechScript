@@ -61,6 +61,7 @@ def script_data_stamp():
     script_data["Mech Timer"] = store_mech_timer
     script_data["mitotic position"] = store_mitotic_position
     script_data["L"] = store_tissue_length
+    script_data["cell_number_in_strip"] = store_cell_number_in_strip
     f = open("script_out.txt", "w")
     f.write(str(script_data))
     f.close()
@@ -124,6 +125,7 @@ elif proliferation_type=="uniform":
 #import sys
 
 attempt = sys.argv[1]
+
 name = "out_" + str(attempt)
 os.makedirs(name, exist_ok=True)
 #moved after import
@@ -650,7 +652,10 @@ store_mech_timer = []
 store_mitotic_position = []
 store_tissue_length = []
 
-def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length):
+#mitotic frequency related parameters
+store_cell_number_in_strip = []
+
+def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length):
     cell_number += [tyssue.face_df.shape[0]]
     tissue_area +=[tyssue.face_df['area'].sum()]
     s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
@@ -691,6 +696,16 @@ def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_positi
     Lmin=min(x_y_ref)
     print("LMIN " + str(Lmin) )
     tissue_length += [ [Lmax,Lmin]  ]
+    
+    
+    cell_number_in_x_strip = []
+    Lap=MF_position-Lmin
+    strip_width = Lap/10
+    for index, row in sheet.face_df.iterrows():
+        for i in range(0, 10):
+            if MF_position - (i+1)*strip_width < row['x'] < MF_position - i*strip_width:
+                 cell_number_in_x_strip[i] += 1
+    cell_number_in_strip += [cell_number_in_x_strip]
     # depreciated
     #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
 
@@ -734,7 +749,7 @@ def chemo_mech_iterator(
                 sheet.face_df.at[face_id, "on_boundary"] = True
         
         
-        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
+        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
 
