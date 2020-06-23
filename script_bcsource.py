@@ -703,7 +703,7 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mi
     strip_width = Lap/10
     for index, row in sheet.face_df.iterrows():
         for i in range(0, 10):
-            if MF_position - (i+1)*strip_width <= row['x'] < MF_position - i*strip_width:
+            if MF_position - (i+1)*strip_width <= row['x'] and row['x'] < MF_position - i*strip_width:
                  cell_number_in_x_strip[i] += 1
     cell_number_in_strip += [cell_number_in_x_strip]
     # depreciated
