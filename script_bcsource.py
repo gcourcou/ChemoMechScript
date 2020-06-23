@@ -700,7 +700,7 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mi
     tissue_length += [ [Lmax,Lmin]  ]
     
     
-    cell_number_in_x_strip = []
+    cell_number_in_x_strip = [0,0,0,0,0,0,0,0,0,0]
     Lap=MF_position_now-Lmin
     strip_width = Lap/10
     for index, row in sheet.face_df.iterrows():
