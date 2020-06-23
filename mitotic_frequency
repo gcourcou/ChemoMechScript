@@ -26,8 +26,9 @@ def  master(file="script_out.txt",division_type="uniform") :
             if dict_from_file["mitotic position"][i][j]!=[0.,0.]:
                 Lap=dict_from_file["MF position"][i]-dict_from_file["L"][i][1]
                 for k in range(0,10):
-                  if dict_from_file["MF position"][i] - (i+1)*Lap/10 <= dict_from_file["mitotic position"][i][j][0] & dict_from_file["mitotic position"][i][j][0] < dict_from_file["MF position"][i] - (i+1)*Lap/10:
-                    mitotic_cell_number[k] += 1
+                  if dict_from_file["MF position"][i] - (i+1)*Lap/10 <= dict_from_file["mitotic position"][i][j][0]:
+                    if dict_from_file["mitotic position"][i][j][0] < dict_from_file["MF position"][i] - (i+1)*Lap/10:
+                        mitotic_cell_number[k] += 1
                 for l in range(0,10):
                   mitotic_frequency[l] = mitotic_cell_number[l] / dict_from_file["cell number in strip"][i][l]
     
