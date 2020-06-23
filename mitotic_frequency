@@ -18,8 +18,8 @@ def  master(file="script_out.txt",division_type="uniform") :
             skip_frame=i
         
         #print("skipping frames " + str(skip_frame))
-    mitotic_cell_number = []
-    mitotic_frequency = []
+    mitotic_cell_number = [0,0,0,0,0,0,0,0,0,0]
+    mitotic_frequency = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
     #skip_frame+=10
     for i in range(skip_frame+1,len(dict_from_file["mitotic position"])):
         for j in range(0,len(dict_from_file["mitotic position"][i])):
