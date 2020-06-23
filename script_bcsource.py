@@ -674,9 +674,11 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mi
     MF_mean_xpos = np.mean(x_y_ref)
     if np.isnan(MF_mean_xpos):
         MF_position += [0.0]
+        MF_position_now = 0.0
     else:
         # MF position is defined as the x position of the MF cells at the midpoint of the eye disc
         MF_position += [MF_mean_xpos]
+        MF_position_now = MF_mean_xpos
     mech_timer += [i * t_mech]
     #  newer way to get L 
 
@@ -699,12 +701,11 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mi
     
     
     cell_number_in_x_strip = []
-    Lap=MF_position-Lmin
+    Lap=MF_position_now-Lmin
     strip_width = Lap/10
     for index, row in sheet.face_df.iterrows():
-        for i in range(0, 10):
-            if (MF_position - (i+1)*strip_width) <= row['x']:
-                if row['x'] < (MF_position - i*strip_width):
+        for j in range(0, 10):
+            if (MF_position_now - (j+1)*strip_width) <= row['x'] and row['x'] < (MF_position_now - j*strip_width):
                  cell_number_in_x_strip[i] += 1
     cell_number_in_strip += [cell_number_in_x_strip]
     # depreciated
