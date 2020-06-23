@@ -706,7 +706,7 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mi
     for index, row in sheet.face_df.iterrows():
         for j in range(0, 10):
             if (MF_position_now - (j+1)*strip_width) <= row['x'] and row['x'] < (MF_position_now - j*strip_width):
-                 cell_number_in_x_strip[i] += 1
+                 cell_number_in_x_strip[j] += 1
     cell_number_in_strip += [cell_number_in_x_strip]
     # depreciated
     #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
