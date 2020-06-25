@@ -11,6 +11,8 @@ def  master(file="script_out.txt",division_type="uniform") :
     #dict_from_file["L"]
 
     skip_frame=0
+    # If we do not put this filter, then skip_frame can be equal to the whole simulation since MF=0.0 when it 
+    # reaches the anterior boundary
     false_skips_due_to_end_filter=30
     for i in range(0,len(dict_from_file["mitotic position"])):
         if dict_from_file["MF position"][i]==0.0 and  i<false_skips_due_to_end_filter :
