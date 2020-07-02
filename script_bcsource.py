@@ -61,6 +61,8 @@ def script_data_stamp():
     script_data["Mech Timer"] = store_mech_timer
     script_data["mitotic position"] = store_mitotic_position
     script_data["L"] = store_tissue_length
+    script_data["posterior area"] = store_P_area
+    script_data["Anterior area"] = store_A_area
     f = open("script_out.txt", "w")
     f.write(str(script_data))
     f.close()
@@ -537,6 +539,8 @@ def plot_topology(timer, sheet):
     plt.savefig("image" + "cellarea_topology" + "{0:0=2d}".format(timer) + ".png")
     # plt.show()
     plt.close()
+    
+    
 
 
 def mf_inf_cell(
@@ -658,8 +662,10 @@ store_mech_timer = []
 # in cell grow and divide
 store_mitotic_position = []
 store_tissue_length = []
+store_P_area = []
+store_A_area = []
 
-def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length):
+def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length, P_area, A_area):
     cell_number += [tyssue.face_df.shape[0]]
     tissue_area +=[tyssue.face_df['area'].sum()]
     s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
@@ -700,6 +706,18 @@ def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_positi
     Lmin=min(x_y_ref)
     print("LMIN " + str(Lmin) )
     tissue_length += [ [Lmax,Lmin]  ]
+    
+    
+    P_area_sum = 0.0
+    A_area_sum = 0.0
+    for index, row in sheet.face_df.iterrows():
+        if row["population_variable"] == "P":
+            P_area_sum += row["area"]
+        elif row["population_variable"] == "A":
+            A_area_sum += row["area"]
+    P_area += P_area_sum
+    A_area += A_area_sum
+    
     # depreciated
     #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
 
@@ -743,7 +761,7 @@ def chemo_mech_iterator(
                 sheet.face_df.at[face_id, "on_boundary"] = True
         
         
-        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
+        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length, store_P_area, store_A_area)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
 
