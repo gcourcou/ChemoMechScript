@@ -61,7 +61,7 @@ def script_data_stamp():
     script_data["Mech Timer"] = store_mech_timer
     script_data["mitotic position"] = store_mitotic_position
     script_data["L"] = store_tissue_length
-    script_data["posterior area"] = store_P_area
+    script_data["Posterior area"] = store_P_area
     script_data["Anterior area"] = store_A_area
     f = open("script_out.txt", "w")
     f.write(str(script_data))
