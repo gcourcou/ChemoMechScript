@@ -6,7 +6,7 @@ MF_low				0.1
 MF_high				1.
 MF_contract			0.7
 MF_relax			1.
-t_mech				0.2
+t_mech 0.2  
 t_f				50
 t_proliferation			0    
 t_plot				10
@@ -20,7 +20,7 @@ amax 0.6
 gamma_G 0.2
 gamma_S 0.5
 boundary_tension 0.7
-proliferation_type		uniform
+proliferation_type		area
 proliferation_time_dependent    exponential
-proliferation_magnitude		1
+proliferation_magnitude   	1.26
 long_axis_div			False

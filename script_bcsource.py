@@ -13,7 +13,7 @@ import numpy as np
 import json
 import matplotlib
 
-matplotlib.use("Agg")
+#matplotlib.use("Agg")
 import matplotlib.pylab as plt
 import matplotlib.animation as animation
 import ipyvolume as ipv
@@ -89,6 +89,9 @@ print(proliferation_time_dependent)
 
 # conversion_r = pixels/micrometer
 # conversion_t = s/t_mech
+# Conversion is calculated with respect to original t_mech
+# so we need to account if we change t_mech
+og_t_mech=0.2
 #1100.596923908011
 #687.4683737855494 incorrect conversion
 #1181.3627550441906 objective MF speed
@@ -98,24 +101,30 @@ if proliferation_type=="area":
     from division_functions_aegerter import cell_Aegerter_area as cell_GS
     if proliferation_time_dependent=="exponential":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            conversion_t=conversion_t*parameters["proliferation_magnitude"]
+            # changing to units of current t_mech
+            conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
             value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.015*(1/conversion_t))
             print(value)
             return value
     elif proliferation_time_dependent=="no":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-            value=parameters["proliferation_magnitude"]
+            value=parameters["proliferation_magnitude"]*( parameters["t_mech"]/og_t_mech  )
             print(value)
             return value        
 elif proliferation_type=="uniform":
     from division_functions_aegerter import cell_Aegerter_uni  as cell_GS
     if proliferation_time_dependent=="exponential":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            conversion_t=conversion_t*parameters["proliferation_magnitude"]
+            # changing to units of current t_mech
+            conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
             value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.018*(1/conversion_t))
             print(value)
             return value
     elif proliferation_time_dependent=="no":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-            value=parameters["proliferation_magnitude"]
+            value=parameters["proliferation_magnitude"]*( parameters["t_mech"]/og_t_mech  )
             print(value)
             return value
 
@@ -137,7 +146,7 @@ nx = parameters["nx"]
 ny = parameters["ny"] + 1
 pos_noise = parameters["pos_noise"]
 
-previously_grown_eye=True
+previously_grown_eye=False
 if previously_grown_eye==True:
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     dsets = hdf5.load_datasets(os.path.join(__location__,"realistic_tissue.hf5") )
