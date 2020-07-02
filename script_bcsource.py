@@ -61,6 +61,8 @@ def script_data_stamp():
     script_data["mitotic position"] = store_mitotic_position
     script_data["L"] = store_tissue_length
     script_data["cell_number_in_strip"] = store_cell_number_in_strip
+    script_data["cell_number_in_strip_pa"] = store_cell_number_in_strip_pa
+    script_data["cell_shape_in_strip_pa"] = store_cell_shape_in_strip_pa
     script_data["Posterior area"] = store_P_area
     script_data["Anterior area"] = store_A_area
     f = open("script_out.txt", "w")
@@ -665,12 +667,14 @@ store_A_area = []
 
 #mitotic frequency related parameters
 store_cell_number_in_strip = []
+store_cell_number_in_strip_pa = []
+store_cell_shape_in_strip_pa = []
 
-def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length,P_area, A_area):
+def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in_strip_pa, cell_shape_in_strip_pa, tissue_area, MF_position, mech_timer, tissue_length,P_area, A_area):
     cell_number += [tyssue.face_df.shape[0]]
     tissue_area +=[tyssue.face_df['area'].sum()]
-    s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
-    mitosis_index +=[np.sum(s_arr) /tyssue.face_df.shape[0] ]
+#    s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
+#    mitosis_index +=[np.sum(s_arr) /tyssue.face_df.shape[0] ]
     x_y_array = np.array(
         [
             [row["x"], row["y"], row["population_variable"] == "MF"]
@@ -717,19 +721,47 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mi
             P_area_sum += row["area"]
         elif row["population_variable"] == "A":
             A_area_sum += row["area"]
-    P_area += P_area_sum
-    A_area += A_area_sum
+    P_area += [P_area_sum]
+    A_area += [A_area_sum]
     
     cell_number_in_x_strip = []
-    for k in range(0, parameters["number_of_slice"]):
+    for k in range(0, int(parameters["number_of_slice"]) ):
         cell_number_in_x_strip.append(0)
     Lap=MF_position_now-Lmin
     strip_width = Lap/parameters["number_of_slice"]
     for index, row in sheet.face_df.iterrows():
-        for j in range(0, parameters["number_of_slice"]):
+        for j in range(0, int(parameters["number_of_slice"]) ):
             if (MF_position_now - (j+1)*strip_width) <= row['x'] and row['x'] < (MF_position_now - j*strip_width):
                  cell_number_in_x_strip[j] += 1
     cell_number_in_strip += [cell_number_in_x_strip]
+    
+    
+    # start shape per strip analysis
+    cell_shape_in_strip_pa_frame=[]
+    
+    cell_number_in_x_strip_pa = []
+    # number of polygon classes is 6 from 4 to 10
+    init_polygon_class = list(np.zeros(6) )
+    
+    for k in range(0, int(parameters["number_of_slice_pa"]) ):
+        cell_number_in_x_strip_pa.append(0)
+        # i want it to be [ [number_6,number_5,...], [ strip 2], [ strip 3]... ]
+        cell_shape_in_strip_pa_frame.append(init_polygon_class )
+    L=Lmax-Lmin
+    strip_width_pa = L/parameters["number_of_slice_pa"]
+    for index, row in sheet.face_df.iterrows():
+        for j in range(0, int(parameters["number_of_slice_pa"]) ):
+            if (Lmax - (j+1)*strip_width_pa) <= row['x'] and row['x'] < (Lmax - j*strip_width_pa):
+                 cell_number_in_x_strip_pa[j] += 1
+                 polygon_class=row['num_sides']
+                 # minus four since zero corresponds to a four sided cell
+                 try:
+                     cell_shape_in_strip_pa_frame[j][polygon_class-4]+=1
+                 except:
+                     pass
+    
+    cell_number_in_strip_pa += [cell_number_in_x_strip_pa ]
+    cell_shape_in_strip_pa  += [cell_shape_in_strip_pa_frame]
     # depreciated
     #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
 
@@ -773,7 +805,7 @@ def chemo_mech_iterator(
                 sheet.face_df.at[face_id, "on_boundary"] = True
         
         
-        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length, store_P_area, store_A_area)
+        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa,  store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length, store_P_area, store_A_area)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
 
@@ -797,7 +829,7 @@ def proliferation(sheet,**kwargs):
     for i in range(0,steps):
         mechanical_reaction(sheet)
         # moved data_collection up since i use info from data for cell growthh
-        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length,store_P_area, store_A_area)
+        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa, store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length,store_P_area, store_A_area)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
         if kwargs["plot"] == True and i%t_plot==0:
