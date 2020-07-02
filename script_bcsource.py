@@ -56,7 +56,6 @@ def script_data_stamp():
     script_data["total real time"] = total_time
     script_data["cell number"] = store_cell_number
     script_data["tissue area"] = store_tissue_area
-    script_data["mitosis index"] = store_mitosis_index
     script_data["MF position"] = store_MF_position
     script_data["Mech Timer"] = store_mech_timer
     script_data["mitotic position"] = store_mitotic_position
@@ -645,7 +644,6 @@ def cell_grow_and_divide(tyssue):
 
 store_cell_number = []
 store_tissue_area=[]
-store_mitosis_index=[]
 store_MF_position = []
 store_mech_timer = []
 # in cell grow and divide
