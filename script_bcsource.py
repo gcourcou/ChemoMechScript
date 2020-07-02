@@ -61,7 +61,7 @@ def script_data_stamp():
     script_data["Mech Timer"] = store_mech_timer
     script_data["mitotic position"] = store_mitotic_position
     script_data["L"] = store_tissue_length
-    script_data["cell number in strip"] = store_cell_number_in_strip
+    script_data["cell_number_in_strip"] = store_cell_number_in_strip
     f = open("script_out.txt", "w")
     f.write(str(script_data))
     f.close()
@@ -700,17 +700,16 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mi
     tissue_length += [ [Lmax,Lmin]  ]
     
     
-    cell_number_in_x_strip = [0,0,0,0,0,0,0,0,0,0]
-    if MF_position_now == 0.0:
-        cell_number_in_strip += [cell_number_in_x_strip]
-    else:
-        Lap=MF_position_now-Lmin
-        strip_width = Lap/10
-        for index, row in sheet.face_df.iterrows():
-            for j in range(0, 10):
-                if (MF_position_now - (j+1)*strip_width) <= row['x'] and row['x'] < (MF_position_now - j*strip_width):
-                     cell_number_in_x_strip[j] += 1
-        cell_number_in_strip += [cell_number_in_x_strip]
+    cell_number_in_x_strip = []
+    for k in range(0, parameters["number_of_slice"]):
+        cell_number_in_x_strip.append(0)
+    Lap=MF_position_now-Lmin
+    strip_width = Lap/10
+    for index, row in sheet.face_df.iterrows():
+        for j in range(0, 10):
+            if (MF_position_now - (j+1)*strip_width) <= row['x'] and row['x'] < (MF_position_now - j*strip_width):
+                 cell_number_in_x_strip[j] += 1
+    cell_number_in_strip += [cell_number_in_x_strip]
     # depreciated
     #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
 
