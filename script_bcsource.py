@@ -56,11 +56,11 @@ def script_data_stamp():
     script_data["total real time"] = total_time
     script_data["cell number"] = store_cell_number
     script_data["tissue area"] = store_tissue_area
-    script_data["mitosis index"] = store_mitosis_index
     script_data["MF position"] = store_MF_position
     script_data["Mech Timer"] = store_mech_timer
     script_data["mitotic position"] = store_mitotic_position
     script_data["L"] = store_tissue_length
+    script_data["cell_number_in_strip"] = store_cell_number_in_strip
     f = open("script_out.txt", "w")
     f.write(str(script_data))
     f.close()
@@ -133,6 +133,7 @@ elif proliferation_type=="uniform":
 #import sys
 
 attempt = sys.argv[1]
+
 name = "out_" + str(attempt)
 os.makedirs(name, exist_ok=True)
 #moved after import
@@ -652,14 +653,16 @@ def cell_grow_and_divide(tyssue):
 
 store_cell_number = []
 store_tissue_area=[]
-store_mitosis_index=[]
 store_MF_position = []
 store_mech_timer = []
 # in cell grow and divide
 store_mitotic_position = []
 store_tissue_length = []
 
-def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length):
+#mitotic frequency related parameters
+store_cell_number_in_strip = []
+
+def data_collection(i, tyssue, cell_number, cell_number_in_strip, tissue_area,mitosis_index, MF_position, mech_timer, tissue_length):
     cell_number += [tyssue.face_df.shape[0]]
     tissue_area +=[tyssue.face_df['area'].sum()]
     s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
@@ -678,9 +681,11 @@ def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_positi
     MF_mean_xpos = np.mean(x_y_ref)
     if np.isnan(MF_mean_xpos):
         MF_position += [0.0]
+        MF_position_now = 0.0
     else:
         # MF position is defined as the x position of the MF cells at the midpoint of the eye disc
         MF_position += [MF_mean_xpos]
+        MF_position_now = MF_mean_xpos
     mech_timer += [i * t_mech]
     #  newer way to get L 
 
@@ -700,6 +705,18 @@ def data_collection(i, tyssue, cell_number, tissue_area,mitosis_index, MF_positi
     Lmin=min(x_y_ref)
     print("LMIN " + str(Lmin) )
     tissue_length += [ [Lmax,Lmin]  ]
+    
+    
+    cell_number_in_x_strip = []
+    for k in range(0, parameters["number_of_slice"]):
+        cell_number_in_x_strip.append(0)
+    Lap=MF_position_now-Lmin
+    strip_width = Lap/parameters["number_of_slice"]
+    for index, row in sheet.face_df.iterrows():
+        for j in range(0, parameters["number_of_slice"]):
+            if (MF_position_now - (j+1)*strip_width) <= row['x'] and row['x'] < (MF_position_now - j*strip_width):
+                 cell_number_in_x_strip[j] += 1
+    cell_number_in_strip += [cell_number_in_x_strip]
     # depreciated
     #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
 
@@ -743,7 +760,7 @@ def chemo_mech_iterator(
                 sheet.face_df.at[face_id, "on_boundary"] = True
         
         
-        data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
+        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
 
