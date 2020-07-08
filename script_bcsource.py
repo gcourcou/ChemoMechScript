@@ -136,8 +136,7 @@ elif proliferation_type=="uniform":
 #import os
 #import sys
 
-#attempt = sys.argv[1]
-attempt = 1
+attempt = sys.argv[1]
 
 name = "out_" + str(attempt)
 os.makedirs(name, exist_ok=True)
