@@ -130,9 +130,76 @@ def  master_interval(file="script_out.txt",division_type="uniform",interval=2) :
     plt.savefig("mitotic_position_"+str(division_type)+"_interval"+".png",bbox_inches='tight',dpi=400)
 
 
+def  master(file="script_out.txt",division_type="uniform") :
+    with open(file) as f:  
+        dict_from_file = eval(f.read()) 
+    
+    #dict_from_file["mitotic position"]
+    #dict_from_file["MF position"]
+    #dict_from_file["L"]
+    # skip initial frames
+    skip_frame_start=0
+    # skip final frames
+    skip_frame_end=0
+    
+    for i in range(0,len(dict_from_file["mitotic position"])):
+        if dict_from_file["MF position"][i]==0.0 and dict_from_file["MF position"][i+1]!=0.0:
+            skip_frame_start=i
+    
+    for i in range(1,len(dict_from_file["mitotic position"])-1):
+        if dict_from_file["MF position"][-i]==0.0 and dict_from_file["MF position"][-i-1]!=0.0:
+            skip_frame_end=i
+    # If we do not put this filter, then skip_frame can be equal to the whole simulation since MF=0.0 when it 
+    # reaches the anterior boundary
+#    false_skips_due_to_end_filter=30
+#    for i in range(0,len(dict_from_file["mitotic position"])):
+#        if dict_from_file["MF position"][i]==0.0 and  i<false_skips_due_to_end_filter :
+#            skip_frame=i
+        
+        #print("skipping frames " + str(skip_frame))
+    init_polygon_class = len(dict_from_file["cell_shape_in_strip_pa"][0][0])
+    shape_frequency = []
+    number_of_slice_pa = len(dict_from_file["cell_number_in_strip_pa"][0])
+    for i in range(0, number_of_slice_pa):
+        shape_frequency.append(0.0)
+
+    #skip_frame+=10
+    for i in range(skip_frame_start+1,len(dict_from_file["mitotic position"])-skip_frame_end):
+        
+        plt.figure(figsize=(10,5),dpi=400)
+        size = init_polygon_class
+        color_saturation_c=size
+        color_min_c=0
+        
+        shape_frequency = []
+        for w in range(0, number_of_slice_pa):
+            shape_frequency.append(0.0)
+        for j in range(0,init_polygon_class):
+            polygon_class = j+4
+            for k in range(0, number_of_slice_pa):
+                shape_frequency[k] = dict_from_file["cell_shape_in_strip_pa"][i][k][j]/dict_from_file["cell_number_in_strip_pa"][i][k]
+            x_interval_pa = 1/number_of_slice_pa
+            xlist = []
+            for l in range (0, number_of_slice_pa):
+                xlist.append((0.5+l)*x_interval_pa)
+        
+            color = plt.cm.jet((j-color_min_c)/(color_saturation_c-color_min_c))
+            plt.plot(xlist,shape_frequency,color=color)
+            
+        sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
+        sm.set_array([]) 
+        cbar=plt.colorbar(sm)
+        cbar.set_label("num_of_sides",fontsize=20)
+        cbar.ax.set_yticklabels(['4','5','6','7','8','9'])
+        plt.title(division_type)
+        plt.xlabel("Position (x/$L_{AP}$) ",fontsize=20)
+        plt.ylabel("shape Frequency",fontsize=20)
+        plt.savefig("shape_frequency_"+str(division_type)+".png",bbox_inches='tight',dpi=400)
+        plt.show()
+        plt.close()
+
 
     
     
-    
-#master(file="script_out.txt",division_type="uniform")
+master(file="script_out.txt",division_type="uniform")
 master_interval(file="script_out.txt",division_type="uniform",interval=2)
