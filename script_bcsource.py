@@ -136,7 +136,8 @@ elif proliferation_type=="uniform":
 #import os
 #import sys
 
-attempt = sys.argv[1]
+#attempt = sys.argv[1]
+attempt = 1
 
 name = "out_" + str(attempt)
 os.makedirs(name, exist_ok=True)
@@ -741,12 +742,12 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in
     
     cell_number_in_x_strip_pa = []
     # number of polygon classes is 6 from 4 to 10
-    init_polygon_class = list(np.zeros(6) )
-    
+#    init_polygon_class = list(np.zeros(6) )
+#    
     for k in range(0, int(parameters["number_of_slice_pa"]) ):
         cell_number_in_x_strip_pa.append(0)
         # i want it to be [ [number_6,number_5,...], [ strip 2], [ strip 3]... ]
-        cell_shape_in_strip_pa_frame.append(init_polygon_class )
+        cell_shape_in_strip_pa_frame.append([0,0,0,0,0,0])
     L=Lmax-Lmin
     strip_width_pa = L/parameters["number_of_slice_pa"]
     for index, row in sheet.face_df.iterrows():
