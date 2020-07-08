@@ -194,7 +194,7 @@ def  master(file="script_out.txt",division_type="uniform") :
         plt.title(division_type)
         plt.xlabel("Position (x/$L_{AP}$) ",fontsize=20)
         plt.ylabel("shape Frequency",fontsize=20)
-        plt.savefig("shape_frequency_"+str(division_type)+".png",bbox_inches='tight',dpi=400)
+        plt.savefig("shape_frequency_"+str(division_type)+str(i)+".png",bbox_inches='tight',dpi=400)
         plt.show()
         plt.close()
 
