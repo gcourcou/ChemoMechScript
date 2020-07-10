@@ -105,7 +105,7 @@ if proliferation_type=="area":
     from division_functions_aegerter import cell_Aegerter_area as cell_GS
     if proliferation_time_dependent=="exponential":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-            conversion_t=conversion_t*parameters["proliferation_magnitude"]
+            conversion_t=conversion_t*parameters["conversion_t_magnitude"]
             # changing to units of current t_mech
             conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
             value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.015*(1/conversion_t))
@@ -120,7 +120,7 @@ elif proliferation_type=="uniform":
     from division_functions_aegerter import cell_Aegerter_uni  as cell_GS
     if proliferation_time_dependent=="exponential":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
-            conversion_t=conversion_t*parameters["proliferation_magnitude"]
+            conversion_t=conversion_t*parameters["conversion_t_magnitude"]
             # changing to units of current t_mech
             conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
             value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.018*(1/conversion_t))
