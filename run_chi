@@ -7,4 +7,4 @@ conda activate myenv
 conda list
 which python
 export HDF5_USE_FILE_LOCKING='FALSE'
-python script_bcsource_chi.py 0
+python script_bcsource.py 0
