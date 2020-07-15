@@ -22,8 +22,8 @@ gamma_S 0.5
 boundary_tension 0.7
 proliferation_type		area
 proliferation_time_dependent    exponential
-proliferation_magnitude   	1.26
-conversion_t_magnitude		1.
+proliferation_magnitude   	1.
+conversion_t_magnitude		1.26
 long_axis_div			False
 number_of_slice			10
 number_of_slice_pa      10

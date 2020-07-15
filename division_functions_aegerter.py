@@ -110,20 +110,16 @@ def area_indep(Vd,ra,alpha):
 def cell_Aegerter_area(sheet,Vd=1.,mu=0.04,A0=0.5,alpha=1,long_axis_div=True) :
     mitotic_shape=[0]
     mitotic_pos=[[0.,0.]]
+    A_average=sheet.face_df['area'].mean()
     for index, row in sheet.face_df.iterrows():
         if row['population_variable'] == 'A':
-            if row["time_for_growth"]<Vd:
-                A_average=sheet.face_df['area'].mean()
-                A_target=row["area"]
-                sheet.face_df.at[index, "time_for_growth"] += area_dep(Vd,mu,A0, A_target ,A_average,alpha)
-            else:
+            A_target=row["area"]
+            sheet.face_df.at[index, "time_for_growth"] += area_dep(Vd,mu,A0, A_target ,A_average,alpha)
+            if row["time_for_growth"]>Vd:
                 mitotic_shape+=[sheet.face_df.loc[index]['num_sides']]
                 mitotic_pos+=[[sheet.face_df.loc[index]['x'],sheet.face_df.loc[index]['y']]]
-                sheet.face_df.at[index, "time_for_growth"]=row["time_for_growth"]/2.
-                if long_axis_div == True:
-                    angle_div = elipse_division_angle(sheet, index)
-                else:
-                    angle_div = random.random() * np.pi
+                sheet.face_df.at[index, "time_for_growth"]=sheet.face_df.at[index, "time_for_growth"]/2.
+                angle_div = random.random() * np.pi
                 daughter = cell_division(sheet, index, geom, angle=angle_div)
     return mitotic_shape,mitotic_pos
 
@@ -134,16 +130,12 @@ def cell_Aegerter_uni(sheet,Vd=1.,mu=0.04,A0=0.5,alpha=1,long_axis_div=True):
     mitotic_pos=[[0.,0.]]
     for index, row in sheet.face_df.iterrows():
         if row['population_variable'] == 'A':
-            if row["time_for_growth"]<Vd:
-                sheet.face_df.at[index, "time_for_growth"] += area_indep(Vd,row['uniform_growth_parameter'],alpha)
-            else  :
+            sheet.face_df.at[index, "time_for_growth"] += area_indep(Vd,row['uniform_growth_parameter'],alpha)
+            if row["time_for_growth"]>Vd:
                 mitotic_shape+=[sheet.face_df.loc[index]['num_sides']]
                 mitotic_pos+=[[sheet.face_df.loc[index]['x'],sheet.face_df.loc[index]['y']]]
-                sheet.face_df.at[index, "time_for_growth"]=row["time_for_growth"]/2.
-                if long_axis_div == True:
-                    angle_div = elipse_division_angle(sheet, index)
-                else:
-                    angle_div = random.random() * np.pi
+                sheet.face_df.at[index, "time_for_growth"]=sheet.face_df.at[index, "time_for_growth"]/2.
+                angle_div = random.random() * np.pi
                 daughter = cell_division(sheet, index, geom, angle=angle_div)
                 sheet.face_df.at[index,'uniform_growth_parameter']=0.25+1.5*np.random.random()
                 sheet.face_df.at[daughter,'uniform_growth_parameter']=0.25+1.5*np.random.random()
@@ -238,3 +230,46 @@ def cell_GS_old(sheet, amin=0.5, amax=0.6, gamma_G=0.25, gamma_S=0.1, t_mech=1):
                 daughter = cell_division(sheet, index, geom, angle=angle_div)
                 sheet.face_df.at[index, "cell_cycle"] = "G"
                 sheet.face_df.at[daughter, "cell_cycle"] = "G"
+
+# depreciated ellipse div
+                
+#def cell_Aegerter_area(sheet,Vd=1.,mu=0.04,A0=0.5,alpha=1,long_axis_div=True) :
+#    mitotic_shape=[0]
+#    mitotic_pos=[[0.,0.]]
+#    A_average=sheet.face_df['area'].mean()
+#    for index, row in sheet.face_df.iterrows():
+#        if row['population_variable'] == 'A':
+#            A_target=row["area"]
+#            sheet.face_df.at[index, "time_for_growth"] += area_dep(Vd,mu,A0, A_target ,A_average,alpha)
+#            if row["time_for_growth"]>Vd:
+#                mitotic_shape+=[sheet.face_df.loc[index]['num_sides']]
+#                mitotic_pos+=[[sheet.face_df.loc[index]['x'],sheet.face_df.loc[index]['y']]]
+#                sheet.face_df.at[index, "time_for_growth"]=sheet.face_df.at[index, "time_for_growth"]/2.
+#                if long_axis_div == True:
+#                    angle_div = elipse_division_angle(sheet, index)
+#                else:
+#                    angle_div = random.random() * np.pi
+#                daughter = cell_division(sheet, index, geom, angle=angle_div)
+#    return mitotic_shape,mitotic_pos
+#
+#
+#def cell_Aegerter_uni(sheet,Vd=1.,mu=0.04,A0=0.5,alpha=1,long_axis_div=True):
+#    # note that input paramters are same as above for practical utility
+#    mitotic_shape=[0]
+#    mitotic_pos=[[0.,0.]]
+#    for index, row in sheet.face_df.iterrows():
+#        if row['population_variable'] == 'A':
+#            if row["time_for_growth"]<Vd:
+#                sheet.face_df.at[index, "time_for_growth"] += area_indep(Vd,row['uniform_growth_parameter'],alpha)
+#            else  :
+#                mitotic_shape+=[sheet.face_df.loc[index]['num_sides']]
+#                mitotic_pos+=[[sheet.face_df.loc[index]['x'],sheet.face_df.loc[index]['y']]]
+#                sheet.face_df.at[index, "time_for_growth"]=row["time_for_growth"]/2.
+#                if long_axis_div == True:
+#                    angle_div = elipse_division_angle(sheet, index)
+#                else:
+#                    angle_div = random.random() * np.pi
+#                daughter = cell_division(sheet, index, geom, angle=angle_div)
+#                sheet.face_df.at[index,'uniform_growth_parameter']=0.25+1.5*np.random.random()
+#                sheet.face_df.at[daughter,'uniform_growth_parameter']=0.25+1.5*np.random.random()
+#    return mitotic_shape,mitotic_pos
