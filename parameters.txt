@@ -6,7 +6,7 @@ MF_low				0.1
 MF_high				1.
 MF_contract			0.7
 MF_relax			1.
-t_mech 0.2  
+t_mech 0.02  
 t_f				50
 t_proliferation			0    
 t_plot				10
