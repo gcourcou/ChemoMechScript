@@ -1,0 +1,10 @@
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --nodes=1
+
+~/.bashrc
+conda activate myenv
+conda list
+which python
+export HDF5_USE_FILE_LOCKING='FALSE'
+python script_bcsource_chi.py 0
