@@ -2,6 +2,13 @@ import matplotlib
 matplotlib.use("Agg")
 
 import matplotlib.pylab as plt     
+plt.rcParams['figure.figsize'] = (7,5)
+font = {'family' : 'normal',
+        'size'   : 20}
+plt.rc('font', **font)
+calc=2760/5
+plt.rcParams['figure.dpi']=calc
+plt.rcParams['savefig.bbox']='tight'
 import numpy as np
 
 from scipy.stats import chisquare
@@ -28,11 +35,11 @@ def r_2_and_poly(x_data,y_data,order=1):
         #Rsquared=(SStot-SSres)/SStot
         Rsquared=r2_score(y_data, np.poly1d(res[0])(x_data) )
         return res[0], Rsquared
-def  scatter_and_fit(target_y,text_x="t_mech",text_y="Lp",text="none"):
+def  scatter_and_fit(target_x,target_y,text_x="Time (h)",text_y="Lp (μm)",text="none"):
     #fig=plt.figure(figsize=(7,5),dpi=calc)
     plt.figure()
     ax=plt.axes()
-    target_x=np.linspace(1,len(target_y), num=len(target_y))-1
+    #target_x=np.linspace(1,len(target_y), num=len(target_y))-1
     #t=np.linspace(0,len(target_y),1)
     #ax.set_title(text)
     plt.plot(target_x,target_y,'.')
@@ -65,51 +72,68 @@ def analyze(bottom="./"):
     gamma_G = parameters["gamma_G"]
     gamma_S = parameters["gamma_S"]
     boundary_tension = float(parameters["boundary_tension"])
-    t_mech=1
-    
+    t_mech=float(parameters["t_mech"])
+    og_t_mech=0.2
     proliferation_magnitude = float(parameters["proliferation_magnitude"])
-    
+    conversion_t_magnitude = float(parameters["conversion_t_magnitude"])
     with open(bottom+"script_out.txt") as f:  
         dict_from_file = eval(f.read()) 
     
-    plt.figure()
-    plt.ylabel("Area (mm^2)")
-    plt.xlabel("t_mech")
+    
     conversion_r=0.23232956642491454
     #pixel/microm
-    conversion_t=915.3565322296259*proliferation_magnitude
+    conversion_t=915.3565322296259*conversion_t_magnitude*(t_mech/og_t_mech)
     #s/t_mech
     conversion_t_hr=conversion_t*0.000277778
     #hr/t_mech
-    area=np.array(dict_from_file["tissue area"])/((conversion_r)**2)
-    plt.plot(area,'.')
-    plt.savefig('area_vs_time.png')
-    plt.close()
+    time_array=np.arange(0,len(dict_from_file["tissue area"]))*conversion_t_hr
+    plot_area_keys=["tissue area","Posterior area","Anterior area"]
+    #names used for plots
+    plot_area_names=["Total area","Posterior area","Anterior area"]
+    for i in range(0,len(plot_area_keys)):
+        key=plot_area_keys[i]
+        yname=plot_area_names[i]
+        plt.figure()
+        plt.ylabel(yname+" ($μm^2$)")
+        plt.xlabel("Time (h)")
+        area=np.array(dict_from_file[key])/((conversion_r)**2)
+        plt.plot(time_array,area,'.')
+        plt.savefig(yname+"_vs_time.png")
+        plt.close()
+#    area=np.array(dict_from_file["tissue area"])/((conversion_r)**2)
+#    plt.plot(area,'.')
+#    plt.savefig('area_vs_time.png')
+#    plt.close()
     Lp=[]
     La=[]
     # the filter here serves the purporse of removing time points that MF has reached the end (if t_prol is non_zero, that is a different story!)
-    toggle_mf_filter=True
+    toggle_mf_filter=False
+    MF_init_phase_threshold=50
     for i in range(0,len(dict_from_file['MF position']) ):
         if dict_from_file['MF position'][i]!=0.0:
-                Lp+=[dict_from_file['L'][i][0]-dict_from_file['MF position'][i] ]
-                La+=[dict_from_file['MF position'][i]-dict_from_file['L'][i][1] ]
+            Lp+=[dict_from_file['L'][i][0]-dict_from_file['MF position'][i] ]
+            La+=[dict_from_file['MF position'][i]-dict_from_file['L'][i][1] ]
         elif toggle_mf_filter==False:
-                Lp+=[dict_from_file['L'][i][0]-dict_from_file['MF position'][i] ]
-                La+=[dict_from_file['MF position'][i]-dict_from_file['L'][i][1] ]
+            if i<MF_init_phase_threshold:
+                Lp+=[0.0]
+                La+=[dict_from_file['L'][i][0]-dict_from_file['L'][i][1] ]
+            else :
+                Lp+=[dict_from_file['L'][i][0]-dict_from_file['L'][i][1] ]
+                La+=[0.0]
     plt.figure()
     Lp=np.array(Lp)/conversion_r
     La=np.array(La)/conversion_r
-    plt.ylabel("Lp")
-    plt.xlabel("t_mech")   
-    plt.plot(Lp,'.')
+    plt.ylabel("Posterior Length (μm)")
+    plt.xlabel("Time (h)")   
+    plt.plot(time_array,Lp,'.')
     #plt.show()
     plt.savefig('Lp_vs_time.png')
     plt.close()
     
     plt.figure()
-    plt.ylabel("La")
-    plt.xlabel("t_mech")
-    plt.plot(La,'.')
+    plt.ylabel("Posterior Length (μm)")
+    plt.xlabel("Time (h)")
+    plt.plot(time_array,La,'.')
     #plt.show()                                                                                                                                                                          
     plt.savefig('La_vs_time.png')
     plt.close()
@@ -119,20 +143,21 @@ def analyze(bottom="./"):
     
     #Lp=Lp[10:]
     
-    coef,rsquared=scatter_and_fit(Lp)
+    coef,rsquared=scatter_and_fit(time_array,Lp)
     print(coef)
     print("Rsq " + str(rsquared) )
     fitted_MF_speed=coef[0]
     # units: micrometer/tmech = micrometer/(t_mech * hr/t_mech)
     # converting to microm/hr
-    fitted_MF_speed=fitted_MF_speed/(conversion_t_hr)
+    #fitted_MF_speed=fitted_MF_speed/(conversion_t_hr)
 
 
     average_area=np.array(dict_from_file["tissue area"])/np.array(dict_from_file["cell number"])
+    average_area=average_area/((conversion_r)**2)
     plt.figure()
-    plt.ylabel("Average Cell Area")
-    plt.xlabel("t_mech")
-    plt.plot(average_area,'.')
+    plt.ylabel("Average cell area ($μm^2$)")
+    plt.xlabel("Time (h)")
+    plt.plot(time_array,average_area,'.')
     plt.savefig('average_area_vs_time.png')
     plt.close()
 

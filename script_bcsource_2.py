@@ -254,7 +254,7 @@ for index, row in sheet.face_df.iterrows():
                     # find face that edge belongs to
                     nearest_neighbor_face_index=sheet.edge_df.at[nearest_neighbor_edge_index, "face"]
                     sheet.face_df.at[nearest_neighbor_face_index, "y_boundary_source_term"] = True
-                    sheet.face_df.at[nearest_neighbor_face_index, "y_concentration"] = 2.0
+                    sheet.face_df.at[nearest_neighbor_face_index, "y_concentration"] = MF_init_c
 
 
 
