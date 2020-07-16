@@ -236,6 +236,7 @@ sheet.face_df.insert(1, "y_boundary_source_term", False)
 for index, row in sheet.face_df.iterrows():
     if row["x"] > with_axis_offset and row["on_boundary"]:
         sheet.face_df.at[index, "y_boundary_source_term"] = True
+        sheet.face_df.at[index, "y_concentration"] = 2.0
         local_edge_df = sheet.edge_df.loc[sheet.edge_df["face"] == index]
         for index2, row2 in local_edge_df.iterrows():
                 # check if edge points t0 the boundary, otherwise target the opposite face for some boundary activation
@@ -245,6 +246,7 @@ for index, row in sheet.face_df.iterrows():
                     # find face that edge belongs to
                     nearest_neighbor_face_index=sheet.edge_df.at[nearest_neighbor_edge_index, "face"]
                     sheet.face_df.at[nearest_neighbor_face_index, "y_boundary_source_term"] = True
+                    sheet.face_df.at[nearest_neighbor_face_index, "y_concentration"] = 2.0
 
 
 # MF interactions
