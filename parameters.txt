@@ -8,7 +8,7 @@ MF_contract			0.7
 MF_relax			1.
 MF_init_c			1.
 t_mech 0.04  
-t_f				10
+t_f				2000
 t_proliferation			0    
 t_plot				50
 y_dif				1
