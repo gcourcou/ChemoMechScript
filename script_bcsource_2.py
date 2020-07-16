@@ -222,6 +222,14 @@ proteins = {"0": "y_concentration"}
 for N_p, p_name in proteins.items():
     sheet.face_df.insert(1, p_name, 0.0)
 
+# MF interactions
+MF_low = parameters["MF_low"]
+MF_high = parameters["MF_high"]
+MF_contract = parameters["MF_contract"]
+MF_relax = parameters["MF_relax"]
+MF_init_c = parameters["MF_init_c"]
+
+
 # define boundary source terms carefully since tissue moves
 sheet.face_df.insert(1, "on_boundary", False)
 for index, row in sheet.edge_df.iterrows():
@@ -236,7 +244,7 @@ sheet.face_df.insert(1, "y_boundary_source_term", False)
 for index, row in sheet.face_df.iterrows():
     if row["x"] > with_axis_offset and row["on_boundary"]:
         sheet.face_df.at[index, "y_boundary_source_term"] = True
-        sheet.face_df.at[index, "y_concentration"] = 2.0
+        sheet.face_df.at[index, "y_concentration"] = MF_init_c
         local_edge_df = sheet.edge_df.loc[sheet.edge_df["face"] == index]
         for index2, row2 in local_edge_df.iterrows():
                 # check if edge points t0 the boundary, otherwise target the opposite face for some boundary activation
@@ -249,11 +257,6 @@ for index, row in sheet.face_df.iterrows():
                     sheet.face_df.at[nearest_neighbor_face_index, "y_concentration"] = 2.0
 
 
-# MF interactions
-MF_low = parameters["MF_low"]
-MF_high = parameters["MF_high"]
-MF_contract = parameters["MF_contract"]
-MF_relax = parameters["MF_relax"]
 
 # Steps=t_f/t_mech evalutation fo mf and div match
 t_mech = parameters["t_mech"]
