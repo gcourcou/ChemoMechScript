@@ -109,7 +109,8 @@ if proliferation_type=="area":
             conversion_t=conversion_t*parameters["conversion_t_magnitude"]
             # changing to units of current t_mech
             conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
-            value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.015*(1/conversion_t))
+            # 2*0.015 since we need half volume to divide
+            value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(2*0.015*(1/conversion_t))
             print(value)
             return value
     elif proliferation_time_dependent=="no":
@@ -124,7 +125,8 @@ elif proliferation_type=="uniform":
             conversion_t=conversion_t*parameters["conversion_t_magnitude"]
             # changing to units of current t_mech
             conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
-            value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(0.018*(1/conversion_t))
+            # 2*0.015 since we need half volume to divide
+            value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(2*0.018*(1/conversion_t))
             print(value)
             return value
     elif proliferation_time_dependent=="no":
