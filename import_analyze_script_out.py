@@ -104,6 +104,15 @@ def analyze(bottom="./"):
 #    plt.plot(area,'.')
 #    plt.savefig('area_vs_time.png')
 #    plt.close()
+    plt.figure()
+    dict_from_file["cell number"]
+    plt.ylabel("Cell number ")
+    plt.xlabel("Time (h)")   
+    plt.plot(time_array,dict_from_file["cell number"],'.')
+    #plt.show()
+    plt.savefig('cell_number_vs_time.png')
+    plt.close()
+    
     Lp=[]
     La=[]
     # the filter here serves the purporse of removing time points that MF has reached the end (if t_prol is non_zero, that is a different story!)
