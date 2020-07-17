@@ -153,7 +153,7 @@ nx = parameters["nx"]
 ny = parameters["ny"] + 1
 pos_noise = parameters["pos_noise"]
 
-previously_grown_eye=False
+previously_grown_eye=True
 if previously_grown_eye==True:
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     dsets = hdf5.load_datasets(os.path.join(__location__,"realistic_tissue.hf5") )
