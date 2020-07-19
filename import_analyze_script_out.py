@@ -113,8 +113,20 @@ def analyze(bottom="./"):
     plt.savefig('cell_number_vs_time.png')
     plt.close()
     
+    average_area=np.array(dict_from_file["tissue area"])/np.array(dict_from_file["cell number"])
+    average_area=average_area/((conversion_r)**2)
+    plt.figure()
+    plt.ylabel("Average cell area ($μm^2$)")
+    plt.xlabel("Time (h)")
+    plt.plot(time_array,average_area,'.')
+    plt.savefig('average_area_vs_time.png')
+    plt.close()
+
     Lp=[]
     La=[]
+    
+    Lpf=[]
+    Laf=[]
     # the filter here serves the purporse of removing time points that MF has reached the end (if t_prol is non_zero, that is a different story!)
     toggle_mf_filter=False
     MF_init_phase_threshold=50
@@ -122,6 +134,8 @@ def analyze(bottom="./"):
         if dict_from_file['MF position'][i]!=0.0:
             Lp+=[dict_from_file['L'][i][0]-dict_from_file['MF position'][i] ]
             La+=[dict_from_file['MF position'][i]-dict_from_file['L'][i][1] ]
+            Lpf+=[dict_from_file['L'][i][0]-dict_from_file['MF position'][i] ]
+            Laf+=[dict_from_file['MF position'][i]-dict_from_file['L'][i][1] ]
         elif toggle_mf_filter==False:
             if i<MF_init_phase_threshold:
                 Lp+=[0.0]
@@ -130,8 +144,14 @@ def analyze(bottom="./"):
                 Lp+=[dict_from_file['L'][i][0]-dict_from_file['L'][i][1] ]
                 La+=[0.0]
     plt.figure()
+    
+    time_arrayf=[]
+    time_arrayf=time_array[0:len(Lpf)]
     Lp=np.array(Lp)/conversion_r
     La=np.array(La)/conversion_r
+    Lpf=np.array(Lpf)/conversion_r
+    Laf=np.array(Laf)/conversion_r
+    
     plt.ylabel("Posterior Length (μm)")
     plt.xlabel("Time (h)")   
     plt.plot(time_array,Lp,'.')
@@ -140,7 +160,7 @@ def analyze(bottom="./"):
     plt.close()
     
     plt.figure()
-    plt.ylabel("Posterior Length (μm)")
+    plt.ylabel("Anterior Length (μm)")
     plt.xlabel("Time (h)")
     plt.plot(time_array,La,'.')
     #plt.show()                                                                                                                                                                          
@@ -152,23 +172,13 @@ def analyze(bottom="./"):
     
     #Lp=Lp[10:]
     
-    coef,rsquared=scatter_and_fit(time_array,Lp)
+    coef,rsquared=scatter_and_fit(time_arrayf,Lpf)
     print(coef)
     print("Rsq " + str(rsquared) )
     fitted_MF_speed=coef[0]
     # units: micrometer/tmech = micrometer/(t_mech * hr/t_mech)
     # converting to microm/hr
     #fitted_MF_speed=fitted_MF_speed/(conversion_t_hr)
-
-
-    average_area=np.array(dict_from_file["tissue area"])/np.array(dict_from_file["cell number"])
-    average_area=average_area/((conversion_r)**2)
-    plt.figure()
-    plt.ylabel("Average cell area ($μm^2$)")
-    plt.xlabel("Time (h)")
-    plt.plot(time_array,average_area,'.')
-    plt.savefig('average_area_vs_time.png')
-    plt.close()
 
     
     out_dict={}
