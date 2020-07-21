@@ -184,9 +184,19 @@ def analyze(bottom="./"):
     out_dict={}
     out_dict['MF speed']=fitted_MF_speed
     out_dict['MF linearity']=rsquared
+    
+    #plot_area_keys=["tissue area","Posterior area","Anterior area"]
+    area=np.array(dict_from_file["tissue area"])/((conversion_r)**2)
+    anterior_area=np.array(dict_from_file["Anterior area"])/((conversion_r)**2)
+    posterior_area=np.array(dict_from_file["Posterior area"])/((conversion_r)**2)
+
+
     out_dict['final average area']=average_area[-1]
     out_dict['final area']  =area[-1]
     out_dict['area']        =area
+    out_dict['posterior_area']=posterior_area
+    out_dict['anterior_area']=anterior_area
+
     out_dict['parameters']=parameters
     MF_last=dict_from_file['MF position'][-1]
     

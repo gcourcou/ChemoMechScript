@@ -64,7 +64,7 @@ for root, dirs, files in os.walk(".", topdown=False):
       
 #print(targets)
 store={}
-parameter_in_question="proliferation_magnitude"
+parameter_in_question="MF_init_c"
 for directory in targets:
     if directory[-1]!="_":
         os.chdir(top_dir+directory)
@@ -96,7 +96,8 @@ os.chdir(top_dir)
 #plt.show()
 
 # zero was not valid
-x_data = np.arange(.3,2.7,.3)
+#x_data = np.arange(.1,.9,.1)
+x_data=[.1 + 0.1*(i) for i in range(0,9)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
@@ -131,7 +132,7 @@ for key in plot_keys:
     a[key]+=[temp][0]
 
 ## plot a time depnendent quanity for many regions in one plot
-plot_keys_vectors=['Lp','La','area']
+plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area']
 # plot for a range that correspodns to average t_mechh
 # i use median
 
