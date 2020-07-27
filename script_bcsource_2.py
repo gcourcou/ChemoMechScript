@@ -68,6 +68,7 @@ def script_data_stamp():
     f = open("script_out.txt", "w")
     f.write(str(script_data))
     f.close()
+    hdf5.save_datasets('sheet.hf5', sheet)
     return 
 
 
