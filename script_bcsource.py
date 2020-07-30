@@ -2,9 +2,11 @@
 # use agg backend matplotlib.use('Agg')
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
-#sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
+sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
 #sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
-sys.path.insert(0,"/scratch/chixu/tools/tyssue")
+#sys.path.insert(0,"/scratch/chixu/tools/tyssue")
+
+#make this main script
 
 import time
 
@@ -14,7 +16,7 @@ import numpy as np
 import json
 import matplotlib
 
-matplotlib.use("Agg")
+#matplotlib.use("Agg")
 import matplotlib.pylab as plt
 import matplotlib.animation as animation
 import ipyvolume as ipv
@@ -40,8 +42,37 @@ from scipy.stats import iqr
 import os
 import sys
 
+try:
+    first_realization=False
+    print("target is")
+    print(sys.argv[2])
+    target=str( sys.argv[2] )
+except:
+    first_realization=True
+
+print(first_realization)
+
 # data collector
 script_data = {}
+# add your desired observable to be defined here
+# default setting is list 
+# append values at will, preferably in data_out step 
+script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
+                  "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
+                  "Remenant area"]
+
+# initialize data structures in dict
+if first_realization==True:
+    for key in script_data_keys:
+        # sort integer definition
+        if key == "total real time":
+            script_data[key]=[]
+        else:
+            script_data[key]=[]
+else:
+    load_dir=str(target)
+    with open("./"+load_dir+"/script_out.txt") as f:
+        script_data = eval(f.read())
 
 # data collector called for txt outputs of data
 def script_data_stamp():
@@ -54,18 +85,18 @@ def script_data_stamp():
     print("time elapsed")
     total_time = end - start
     print(total_time)
-    script_data["total real time"] = total_time
-    script_data["cell number"] = store_cell_number
-    script_data["tissue area"] = store_tissue_area
-    script_data["MF position"] = store_MF_position
-    script_data["Mech Timer"] = store_mech_timer
-    script_data["mitotic position"] = store_mitotic_position
-    script_data["L"] = store_tissue_length
-    script_data["cell_number_in_strip"] = store_cell_number_in_strip
-    script_data["cell_number_in_strip_pa"] = store_cell_number_in_strip_pa
-    script_data["cell_shape_in_strip_pa"] = store_cell_shape_in_strip_pa
-    script_data["Posterior area"] = store_P_area
-    script_data["Anterior area"] = store_A_area
+    script_data["total real time"] += [total_time]
+#    script_data["cell number"] = store_cell_number
+#    script_data["tissue area"] = store_tissue_area
+#    script_data["MF position"] = store_MF_position
+#    script_data["Mech Timer"] = store_mech_timer
+#    script_data["mitotic position"] = store_mitotic_position
+#    script_data["L"] = store_tissue_length
+#    script_data["cell_number_in_strip"] = store_cell_number_in_strip
+#    script_data["cell_number_in_strip_pa"] = store_cell_number_in_strip_pa
+#    script_data["cell_shape_in_strip_pa"] = store_cell_shape_in_strip_pa
+#    script_data["Posterior area"] = store_P_area
+#    script_data["Anterior area"] = store_A_area
     f = open("script_out.txt", "w")
     f.write(str(script_data))
     f.close()
@@ -103,6 +134,8 @@ og_t_mech=0.2
 #1181.3627550441906 objective MF speed
 #_5 915.3565322296259 Lposterior fit vs t_mech
 #_6 874.0061531374303 Lposterior fit vs t_mech noticed that MF speed is time dependent
+conversion_t=915.3565322296259*parameters["conversion_t_magnitude"]*( parameters["t_mech"]/og_t_mech  )
+conversion_t_hr=conversion_t*(1/60*1/60)
 if proliferation_type=="area":
     from division_functions_aegerter import cell_Aegerter_area as cell_GS
     if proliferation_time_dependent=="exponential":
@@ -142,7 +175,7 @@ elif proliferation_type=="uniform":
 
 attempt = sys.argv[1]
 
-name = "out_" + str(attempt)
+name = str(attempt)
 os.makedirs(name, exist_ok=True)
 #moved after import
 #os.chdir(name)
@@ -155,17 +188,24 @@ nx = parameters["nx"]
 ny = parameters["ny"] + 1
 pos_noise = parameters["pos_noise"]
 
-previously_grown_eye=True
-if previously_grown_eye==True:
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-    dsets = hdf5.load_datasets(os.path.join(__location__,"realistic_tissue.hf5") )
-    #dsets = hdf5.load_datasets("./"+load_dir+'/sheet.hf5')
+if first_realization==True:
+    previously_grown_eye=True
+    if previously_grown_eye==True:
+        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        dsets = hdf5.load_datasets(os.path.join(__location__,"realistic_tissue.hf5") )
+        #dsets = hdf5.load_datasets("./"+load_dir+'/sheet.hf5')
+        specs = config.geometry.planar_sheet()
+        sheet = Sheet('periodic', dsets, specs)
+    else:
+        sheet = Sheet.planar_sheet_2d(
+            "basic2D", nx=int(nx), ny=int(ny), distx=1, disty=1, noise=pos_noise
+            )
+else:
+    dsets = hdf5.load_datasets(os.path.join(__location__,load_dir,"sheet.hf5") )
     specs = config.geometry.planar_sheet()
     sheet = Sheet('periodic', dsets, specs)
-else:
-    sheet = Sheet.planar_sheet_2d(
-        "basic2D", nx=int(nx), ny=int(ny), distx=1, disty=1, noise=pos_noise
-        )
+    
+    
 # after loading tyssue i go to res dir for outputs
 os.chdir(name) 
 # Ellipse!
@@ -173,13 +213,14 @@ rx = parameters["rx"]
 sigma = 172.0 / 74.0
 ry = rx * sigma
 
-sheet = sheet.extract_bounding_box_GC_2dellipse(rx, ry, coords=["x", "y"])
 
+if first_realization==True:
+    sheet = sheet.extract_bounding_box_GC_2dellipse(rx, ry, coords=["x", "y"])
+    from tyssue.topology.base_topology import merge_border_edges
+    merge_border_edges(sheet)
+else:
+    pass
 
-from tyssue.topology.base_topology import merge_border_edges
-
-merge_border_edges(sheet)
-#
 
 
 PlanarGeometry.update_all(sheet)
@@ -222,30 +263,47 @@ fig.set_size_inches(7, 6)
 proteins = {"0": "y_concentration"}
 
 
-# Initialize morphogens in dataframe
-for N_p, p_name in proteins.items():
-    sheet.face_df.insert(1, p_name, 0.0)
-
-# define boundary source terms carefully since tissue moves
-sheet.face_df.insert(1, "on_boundary", False)
-for index, row in sheet.edge_df.iterrows():
-    if row["opposite"] == -1:
-        face_id = row["face"]
-        sheet.face_df.at[face_id, "on_boundary"] = True
-# source_term_width=parameters['source_term_width']
-source_term_width = 0.2 * (sheet.face_df["x"].max() - sheet.face_df["x"].min())
-with_axis_offset = sheet.face_df["x"].max() - source_term_width
-sheet.face_df.insert(1, "y_boundary_source_term", False)
-# x_pos_for_source = sheet.face_df['x'].max()-source_term_width
-for index, row in sheet.face_df.iterrows():
-    if row["x"] > with_axis_offset and row["on_boundary"]:
-        sheet.face_df.at[index, "y_boundary_source_term"] = True
 
 # MF interactions
 MF_low = parameters["MF_low"]
 MF_high = parameters["MF_high"]
 MF_contract = parameters["MF_contract"]
 MF_relax = parameters["MF_relax"]
+MF_init_c = parameters["MF_init_c"]
+
+if first_realization==True: 
+    # Initialize morphogens in dataframe
+    for N_p, p_name in proteins.items():
+        sheet.face_df.insert(1, p_name, 0.0)
+    # define boundary source terms carefully since tissue moves
+    sheet.face_df.insert(1, "on_boundary", False)
+    for index, row in sheet.edge_df.iterrows():
+        if row["opposite"] == -1:
+            face_id = row["face"]
+            sheet.face_df.at[face_id, "on_boundary"] = True
+    # source_term_width=parameters['source_term_width']
+    source_term_width = 0.2 * (sheet.face_df["x"].max() - sheet.face_df["x"].min())
+    with_axis_offset = sheet.face_df["x"].max() - source_term_width
+    sheet.face_df.insert(1, "y_boundary_source_term", False)
+    # x_pos_for_source = sheet.face_df['x'].max()-source_term_width
+    for index, row in sheet.face_df.iterrows():
+        if row["x"] > with_axis_offset and row["on_boundary"]:
+            sheet.face_df.at[index, "y_boundary_source_term"] = True
+            sheet.face_df.at[index, "y_concentration"] = MF_init_c
+            local_edge_df = sheet.edge_df.loc[sheet.edge_df["face"] == index]
+            for index2, row2 in local_edge_df.iterrows():
+                    # check if edge points t0 the boundary, otherwise target the opposite face for some boundary activation
+                    if row2["opposite"]!=-1:
+                        # find opposite edge
+                        nearest_neighbor_edge_index=row2["opposite"]
+                        # find face that edge belongs to
+                        nearest_neighbor_face_index=sheet.edge_df.at[nearest_neighbor_edge_index, "face"]
+                        sheet.face_df.at[nearest_neighbor_face_index, "y_boundary_source_term"] = True
+                        sheet.face_df.at[nearest_neighbor_face_index, "y_concentration"] = MF_init_c
+else:
+    1==1
+
+
 
 # Steps=t_f/t_mech evalutation fo mf and div match
 t_mech = parameters["t_mech"]
@@ -264,7 +322,7 @@ amax = parameters["amax"]
 gamma_G = parameters["gamma_G"]
 gamma_S = parameters["gamma_S"]
 boundary_tension = float(parameters["boundary_tension"])
-
+boundary_flux = float(parameters["boundary_flux"])
 
 #
 Dif_mag = {0: y_dif}
@@ -283,27 +341,29 @@ auto_prod_mag[0] = [
 growth_control_by = parameters["growth_control_by"]
 
 ## Initialize other cell centric variabls not included in tyssue
-cell_vars = {
-    "0": "cell_cycle",
-    "1": "time_in_cycle",
-    "2": "population _variable",
-    "3": "time_in_growth",
-    "4": "time_for_growth",
-}
-int_cell_cycle = parameters["int_cell_cycle"]
-sheet.face_df["cell_cycle"] = int_cell_cycle
-sheet.face_df.insert(1, "time_in_cycle", 0)
-
-# loading file causes error so equal is better
-#sheet.face_df.insert(1, "population_variable", "P")
-sheet.face_df["population_variable"]=["P" for i in range(0,sheet.face_df.shape[0])]
-sheet.face_df.insert(1, "time_in_growth", 0)
-#sheet.face_df.insert(1, "time_for_growth", 0)
-
-# Initialize params for aegerter growth
-sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
-sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
-
+if first_realization==True:  
+    cell_vars = {
+        "0": "cell_cycle",
+        "1": "time_in_cycle",
+        "2": "population _variable",
+        "3": "time_in_growth",
+        "4": "time_for_growth",
+    }
+    int_cell_cycle = parameters["int_cell_cycle"]
+    sheet.face_df["cell_cycle"] = int_cell_cycle
+    sheet.face_df.insert(1, "time_in_cycle", 0)
+    
+    # loading file causes error so equal is better
+    #sheet.face_df.insert(1, "population_variable", "P")
+    sheet.face_df["population_variable"]=["P" for i in range(0,sheet.face_df.shape[0])]
+    sheet.face_df.insert(1, "time_in_growth", 0)
+    #sheet.face_df.insert(1, "time_for_growth", 0)
+    
+    # Initialize params for aegerter growth
+    sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
+    sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
+else:
+    1==1
 # sheet.face_df.insert(1,'on_boundary',False)
 
 # MOVED DOWN
@@ -605,7 +665,15 @@ def mechanical_reaction(tyssue):
     for index, row in sheet.face_df.iterrows():
         if row["x"] > with_axis_offset and row["on_boundary"]:
             sheet.face_df.at[index, "y_boundary_source_term"] = True
-
+            local_edge_df = sheet.edge_df.loc[sheet.edge_df["face"] == index]
+            for index2, row2 in local_edge_df.iterrows():
+                # check if edge points t0 the boundary, otherwise target the opposite face for some boundary activation
+                if row2["opposite"]!=-1:
+                    # find opposite edge
+                    nearest_neighbor_edge_index=row2["opposite"]
+                    # find face that edge belongs to
+                    nearest_neighbor_face_index=sheet.edge_df.at[nearest_neighbor_edge_index, "face"]
+                    sheet.face_df.at[nearest_neighbor_face_index, "y_boundary_source_term"] = True
     auto_prod_mag[0] = [
         -h_auto * (int(row["y_boundary_source_term"]) * 2 - 1)
         for index, row in sheet.face_df.iterrows()
@@ -630,15 +698,21 @@ def cell_grow_and_divide(tyssue):
     # cell_growth_and_division_2D(tyssue, 0.5, 3, 4, 3, string='y_concentration')
     # cell_growth_and_division_2D(tyssue, 0.5, 3*2, 4*2, 3, string='z_concentration')
     #cell_GS(tyssue, amin, amax, gamma_G, gamma_S, t_mech)
-    if store_MF_position[-1]==0:
+    if script_data["MF position"][-1]==0:
         #PL=store_tissue_length[-1][0]-store_tissue_length[-1][1]
         PL=0.0
     else :
         #PL=store_MF_position[-1]-store_tissue_length[-1][1]
-        PL=store_tissue_length[-1][0]-store_MF_position[-1]
+        # rep 11 tkssue lengthh and store_MF do not exist
+        PL=script_data["L"][-1][0]-script_data["MF position"][-1]
+        #PL=store_tissue_length[-1][0]-store_MF_position[-1]
+        # rep 11
     mitotic_shape, mitotic_position = cell_GS(sheet,1.,0.04,0.5,f_alpha(PL),long_axis_div=False)
     # store division position relative to MF
-    store_mitotic_position+=[mitotic_position]
+    # rep 10 this can be done since cell_GS is executed every t_mech anyway!
+    script_data["mitotic position"]+=[mitotic_position]
+    #store_mitotic_position+=[mitotic_position]
+    #
     tri_faces = sheet.face_df[sheet.face_df["num_sides"] < 4].index
 
     cells = sheet.face_df.shape[0]
@@ -659,24 +733,33 @@ def cell_grow_and_divide(tyssue):
             sheet.face_df.at[face_id, "on_boundary"] = False
 
 
-store_cell_number = []
-store_tissue_area=[]
-store_MF_position = []
-store_mech_timer = []
-# in cell grow and divide
-store_mitotic_position = []
-store_tissue_length = []
-store_P_area = []
-store_A_area = []
+#store_cell_number = []
+#store_tissue_area=[]
+#store_MF_position = []
+#store_mech_timer = []
+## in cell grow and divide
+#store_mitotic_position = []
+#store_tissue_length = []
+#store_P_area = []
+#store_A_area = []
+#
+##mitotic frequency related parameters
+#store_cell_number_in_strip = []
+#store_cell_number_in_strip_pa = []
+#store_cell_shape_in_strip_pa = []
 
-#mitotic frequency related parameters
-store_cell_number_in_strip = []
-store_cell_number_in_strip_pa = []
-store_cell_shape_in_strip_pa = []
-
-def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in_strip_pa, cell_shape_in_strip_pa, tissue_area, MF_position, mech_timer, tissue_length,P_area, A_area):
-    cell_number += [tyssue.face_df.shape[0]]
-    tissue_area +=[tyssue.face_df['area'].sum()]
+def data_collection(i, tyssue):
+#                    cell_number, cell_number_in_strip, cell_number_in_strip_pa, cell_shape_in_strip_pa, tissue_area, MF_position, mech_timer, tissue_length,P_area, A_area):
+    
+    # rep 1
+    script_data["cell number"]+=[tyssue.face_df.shape[0]]
+    #cell_number += [tyssue.face_df.shape[0]]
+    # rep 1
+    
+    # rep 2
+    script_data["tissue area"]+=[tyssue.face_df['area'].sum()]
+    #tissue_area +=[tyssue.face_df['area'].sum()]
+    # rep2
 #    s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
 #    mitosis_index +=[np.sum(s_arr) /tyssue.face_df.shape[0] ]
     x_y_array = np.array(
@@ -690,15 +773,37 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in
     for item in x_y_array:
         if val - 1.0 < item[1] < val + 1.0 and item[2] == True:
             x_y_ref.append(item[0])
-    MF_mean_xpos = np.mean(x_y_ref)
-    if np.isnan(MF_mean_xpos):
-        MF_position += [0.0]
+            
+    MF_mean_xpos=0.0
+    if len(x_y_ref)==0:
+        script_data["MF position"]+=[0.0]
         MF_position_now = 0.0
     else:
-        # MF position is defined as the x position of the MF cells at the midpoint of the eye disc
-        MF_position += [MF_mean_xpos]
+        MF_mean_xpos = np.mean(x_y_ref)
+        script_data["MF position"]+=[MF_mean_xpos]
         MF_position_now = MF_mean_xpos
-    mech_timer += [i * t_mech]
+        
+#    MF_mean_xpos = np.mean(x_y_ref)
+#    if np.isnan(MF_mean_xpos):
+#        #rep 3
+#        #MF_position += [0.0]
+#        script_data["MF position"]+=[0.0]
+#        #rep 3
+#        
+#        MF_position_now = 0.0
+#    else:
+#        # MF position is defined as the x position of the MF cells at the midpoint of the eye disc
+#        #rep 3
+#        script_data["MF position"]+=[MF_mean_xpos]
+#        #MF_position += [MF_mean_xpos]
+#        #rep 3
+#        MF_position_now = MF_mean_xpos
+        
+    # rep 4
+    script_data["Mech Timer"]+=[MF_mean_xpos]
+    #mech_timer += [i * t_mech]
+    # rep 4
+    
     #  newer way to get L 
 
     x_y_array = np.array(
@@ -716,7 +821,11 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in
     print("LMAX " + str(Lmax) )
     Lmin=min(x_y_ref)
     print("LMIN " + str(Lmin) )
-    tissue_length += [ [Lmax,Lmin]  ]
+    
+    # rep 5
+    script_data["L"]+=[ [Lmax,Lmin]  ]
+    #tissue_length += [ [Lmax,Lmin]  ]
+    # rep 5
     
     P_area_sum = 0.0
     A_area_sum = 0.0
@@ -725,8 +834,13 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in
             P_area_sum += row["area"]
         elif row["population_variable"] == "A":
             A_area_sum += row["area"]
-    P_area += [P_area_sum]
-    A_area += [A_area_sum]
+    
+    # rep 6,7
+    script_data["Posterior area"]+=[P_area_sum]
+    script_data["Anterior area"]+=[A_area_sum]
+    #P_area += [P_area_sum]
+    #A_area += [A_area_sum]
+    #
     
     cell_number_in_x_strip = []
     for k in range(0, int(parameters["number_of_slice"]) ):
@@ -737,8 +851,11 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in
         for j in range(0, int(parameters["number_of_slice"]) ):
             if (MF_position_now - (j+1)*strip_width) <= row['x'] and row['x'] < (MF_position_now - j*strip_width):
                  cell_number_in_x_strip[j] += 1
-    cell_number_in_strip += [cell_number_in_x_strip]
-    
+                 
+    # rep 8
+    script_data["cell_number_in_strip"]+= [cell_number_in_x_strip]
+    #cell_number_in_strip += [cell_number_in_x_strip]
+    #
     
     # start shape per strip analysis
     cell_shape_in_strip_pa_frame=[]
@@ -764,11 +881,18 @@ def data_collection(i, tyssue, cell_number, cell_number_in_strip, cell_number_in
                  except:
                      pass
     
-    cell_number_in_strip_pa += [cell_number_in_x_strip_pa ]
-    cell_shape_in_strip_pa  += [cell_shape_in_strip_pa_frame]
-    # depreciated
-    #tissue_length += [ [tyssue.face_df['x'].max(),tyssue.face_df['x'].min()]  ]
-
+    # rep 9
+    script_data["cell_number_in_strip_pa"]+= [cell_number_in_x_strip_pa ]
+    script_data["cell_shape_in_strip_pa"]+= [cell_shape_in_strip_pa_frame]
+    #cell_number_in_strip_pa += [cell_number_in_x_strip_pa ]
+    #cell_shape_in_strip_pa  += [cell_shape_in_strip_pa_frame]
+    #
+    remenant_area=0
+    for index, row in sheet.face_df.iterrows():
+        if row["population_variable"]!="A" :
+            remenant_area+=row["time_for_growth"]-0.5
+    script_data["Remenant area"]+=[remenant_area]
+    
 def chemo_mech_iterator(
     sheet,
     initial_concentration,
@@ -782,9 +906,13 @@ def chemo_mech_iterator(
     # derivative function returns n-value vector args (t,x)
     # plot_function should take only the step number as argument i.e. def visualization(step) : animate_cells2(step,"mech")
     steps = int(kwargs["t_f"]/kwargs["t_mech"])
+    if first_realization==True:
+        prev_steps=0
+    else:
+        prev_steps=len(script_data["cell number"])
     # only proliferation steps
     steps_proliferation=int(kwargs["t_proliferation"]/kwargs["t_mech"])
-    for i in range(0+steps_proliferation, steps+steps_proliferation):
+    for i in range(0+steps_proliferation+prev_steps, steps+steps_proliferation+prev_steps):
         print(i)
         # time evolve by one t_mech step
         mechanical_reaction(sheet)
@@ -809,7 +937,8 @@ def chemo_mech_iterator(
                 sheet.face_df.at[face_id, "on_boundary"] = True
         
         
-        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa,  store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length, store_P_area, store_A_area)
+        data_collection(i, sheet)
+        #                store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa,  store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length, store_P_area, store_A_area)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
 
@@ -833,7 +962,8 @@ def proliferation(sheet,**kwargs):
     for i in range(0,steps):
         mechanical_reaction(sheet)
         # moved data_collection up since i use info from data for cell growthh
-        data_collection(i, sheet, store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa, store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length,store_P_area, store_A_area)
+        data_collection(i, sheet)
+        #               store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa, store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length,store_P_area, store_A_area)
         cell_grow_and_divide(sheet)
         solver.find_energy_min(sheet, geom, model)
         if kwargs["plot"] == True and i%t_plot==0:
