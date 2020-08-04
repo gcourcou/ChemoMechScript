@@ -201,7 +201,7 @@ if first_realization==True:
             "basic2D", nx=int(nx), ny=int(ny), distx=1, disty=1, noise=pos_noise
             )
 else:
-    dsets = hdf5.load_datasets(os.path.join(__location__,load_dir,"sheet.hf5") )
+    dsets = hdf5.load_datasets("./"+load_dir+'/sheet.hf5' )
     specs = config.geometry.planar_sheet()
     sheet = Sheet('periodic', dsets, specs)
     
