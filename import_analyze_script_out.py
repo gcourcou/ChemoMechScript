@@ -90,6 +90,8 @@ def analyze(bottom="./"):
     plot_area_keys=["tissue area","Posterior area","Anterior area"]
     #names used for plots
     plot_area_names=["Total area","Posterior area","Anterior area"]
+    plot_number_of_sides_in_MF=["average_number_of_sides_in_MF"]
+    plot_area_in_MF=["average_area_in_MF"]
     for i in range(0,len(plot_area_keys)):
         key=plot_area_keys[i]
         yname=plot_area_names[i]
@@ -97,6 +99,28 @@ def analyze(bottom="./"):
         plt.ylabel(yname+" ($μm^2$)")
         plt.xlabel("Time (h)")
         area=np.array(dict_from_file[key])/((conversion_r)**2)
+        plt.plot(time_array,area,'.')
+        plt.savefig(yname+"_vs_time.png")
+        plt.close()
+    for i in range(0,len(plot_number_of_sides_in_MF)):
+        key=plot_number_of_sides_in_MF[i]
+        yname="average_number_of_sides_in_MF"
+        plt.figure()
+        plt.ylabel(yname+" ($μm^2$)")
+        plt.xlabel("Time (h)")
+        num_of_sides = np.array(dict_from_file[key])
+        num_of_sides[ num_of_sides==0 ] = np.nan 
+        plt.plot(time_array,num_of_sides,'.')
+        plt.savefig(yname+"_vs_time.png")
+        plt.close()
+    for i in range(0,len(plot_area_in_MF)):
+        key=plot_area_in_MF[i]
+        yname="average_area_in_MF"
+        plt.figure()
+        plt.ylabel(yname+" ($μm^2$)")
+        plt.xlabel("Time (h)")
+        area=np.array(dict_from_file[key])/((conversion_r)**2)
+        area[ area==0 ] = np.nan
         plt.plot(time_array,area,'.')
         plt.savefig(yname+"_vs_time.png")
         plt.close()
@@ -196,6 +220,14 @@ def analyze(bottom="./"):
     out_dict['area']        =area
     out_dict['posterior_area']=posterior_area
     out_dict['anterior_area']=anterior_area
+    
+    ave_num_sides_MF = np.array(dict_from_file["average_number_of_sides_in_MF"])
+    ave_num_sides_MF[ ave_num_sides_MF==0 ] = np.nan
+    out_dict['average_number_of_sides_in_MF']=ave_num_sides_MF
+
+    ave_area_MF = np.array(dict_from_file["average_area_in_MF"])/((conversion_r)**2)
+    ave_area_MF[ ave_area_MF==0 ] = np.nan
+    out_dict['average_area_in_MF'] = ave_area_MF
 
     out_dict['parameters']=parameters
     MF_last=dict_from_file['MF position'][-1]
@@ -212,7 +244,6 @@ def analyze(bottom="./"):
 
 
 #print(analyze())
-
 
 
 
