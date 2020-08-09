@@ -77,7 +77,7 @@ def  master_interval(file="script_out.txt",division_type="uniform",interval=2) :
     # skip final frames
     skip_frame_end=0
     
-    for i in range(0,len(dict_from_file["mitotic position"])):
+    for i in range(0,len(dict_from_file["mitotic position"])-1):
         if dict_from_file["MF position"][i]==0.0 and dict_from_file["MF position"][i+1]!=0.0:
             skip_frame_start=i
     
@@ -130,7 +130,7 @@ def  master_interval(file="script_out.txt",division_type="uniform",interval=2) :
     plt.savefig("mitotic_position_"+str(division_type)+"_interval"+".png",bbox_inches='tight',dpi=400)
 
 
-def  master(file="script_out.txt",division_type="uniform") :
+def  master(file="script_out.txt",division_type="uniform", interval = 2) :
     with open(file) as f:  
         dict_from_file = eval(f.read()) 
     
@@ -142,7 +142,7 @@ def  master(file="script_out.txt",division_type="uniform") :
     # skip final frames
     skip_frame_end=0
     
-    for i in range(0,len(dict_from_file["mitotic position"])):
+    for i in range(0,len(dict_from_file["mitotic position"])-1):
         if dict_from_file["MF position"][i]==0.0 and dict_from_file["MF position"][i+1]!=0.0:
             skip_frame_start=i
     
@@ -164,8 +164,9 @@ def  master(file="script_out.txt",division_type="uniform") :
         shape_frequency.append(0.0)
 
     #skip_frame+=10
-    for i in range(skip_frame_start+1,len(dict_from_file["mitotic position"])-skip_frame_end):
-        
+    size=int((len(dict_from_file["mitotic position"])-skip_frame_start-skip_frame_end)/interval-1)
+    for m in range(0,size):
+        i = m * interval + skip_frame_start + 1
         plt.figure(figsize=(10,5),dpi=400)
         size = init_polygon_class
         color_saturation_c=size
@@ -201,5 +202,6 @@ def  master(file="script_out.txt",division_type="uniform") :
 
     
     
-master(file="script_out.txt",division_type="uniform")
-master_interval(file="script_out.txt",division_type="uniform",interval=2)
+master(file="script_out.txt",division_type="uniform", interval=20)
+master_interval(file="script_out.txt",division_type="uniform",interval=20)
+
