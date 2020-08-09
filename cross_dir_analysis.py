@@ -64,7 +64,7 @@ for root, dirs, files in os.walk(".", topdown=False):
       
 #print(targets)
 store={}
-parameter_in_question="MF_init_c"
+parameter_in_question="MF_contract"
 for directory in targets:
     if directory[-1]!="_":
         os.chdir(top_dir+directory)
@@ -97,7 +97,7 @@ os.chdir(top_dir)
 
 # zero was not valid
 #x_data = np.arange(.1,.9,.1)
-x_data=[.1 + 0.1*(i) for i in range(0,9)]  
+x_data=[.4 + 0.1*(i) for i in range(0,7)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
@@ -136,6 +136,8 @@ plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area']
 # plot for a range that correspodns to average t_mechh
 # i use median
 
+plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF']
+
 for key in plot_keys_vectors:
     plt.figure()
     # store length of array with time dep quantity
@@ -172,6 +174,44 @@ for key in plot_keys_vectors:
     plt.close()
 ## end time dep plot
 
+for key in plot_keys_MF:
+    plt.figure()
+    # store length of array with time dep quantity
+    time_dep_len=[]
+    max_y=[]
+    min_y=[]
+    max_x=[]
+    min_x=[]
+    for item_x in x_data:
+        #915 is the converion_t
+        # accounting for t_mech
+        og_t_mech=0.2
+        time_array=np.arange(0,len(store[item_x][key]))*store[item_x]['parameters']['conversion_t_magnitude']*915.3565322296259*(store[item_x]['parameters']['t_mech']/og_t_mech)*0.000277778
+        plt.plot(time_array,store[item_x][key],color=mag_colour_data[item_x])
+        #time_dep_len+=[len(store[item_x][key])]
+        max_y+=[np.max(store[item_x][key])]
+        min_y+=[np.min(store[item_x][key])]
+        max_x+=[np.max(time_array)]
+        min_x+=[np.min(time_array)]
+    x_range_up=np.max(max_x)
+    x_range_down=np.min(min_x)
+    plt.xlim(x_range_down,x_range_up)
+    y_range_up=np.max(max_y)
+    y_range_down=np.min(min_y)
+    if key == 'average_number_of_sides_in_MF':
+        plt.ylim(0.0,8.0)
+    else:
+        plt.ylim(0.0,20.0)
+    sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
+    cbar=plt.colorbar(sm)
+    cbar.set_label(parameter_in_question,fontsize=20)
+    plt.title(str(key))
+    print(str(key) + " time dep plot x range is " )
+    print(x_range_up)
+    print(x_range_down)
+    plt.savefig("cross_plot_"+str(key)+".png")
+    plt.close()
+
 for key in plot_keys:
     plt.figure()
     print(x_data)
@@ -186,3 +226,4 @@ for key in plot_keys:
 #test = np.random.random((6, 5))
 #
 #heatmap(test,x_data,y_data)
+
