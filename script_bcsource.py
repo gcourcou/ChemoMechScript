@@ -61,7 +61,7 @@ script_data = {}
 # append values at will, preferably in data_out step 
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
-                  "Remenant area"]
+                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -901,6 +901,25 @@ def data_collection(i, tyssue):
         if row["population_variable"]!="A" :
             remenant_area+=row["time_for_growth"]-0.5
     script_data["Remenant area"]+=[remenant_area]
+    
+    average_number_of_sides_in_MF_frame = 0.0
+    total_number_of_sides_in_MF_frame = 0
+    number_of_cells_in_MF_frame = 0
+    total_area_in_MF_frame = 0.0
+    average_area_in_MF_frame = 0.0
+    for index,row in sheet.face_df.iterrows():
+        if row["population_variable"] == "MF":
+            number_of_cells_in_MF_frame += 1
+            total_number_of_sides_in_MF_frame += row["num_sides"]
+            total_area_in_MF_frame += row["area"]
+    if number_of_cells_in_MF_frame == 0:
+        average_number_of_sides_in_MF_frame = 0.0
+        average_area_in_MF_frame = 0.0
+    else:
+        average_number_of_sides_in_MF_frame = total_number_of_sides_in_MF_frame/number_of_cells_in_MF_frame
+        average_area_in_MF_frame = total_area_in_MF_frame/number_of_cells_in_MF_frame
+    script_data["average_number_of_sides_in_MF"]+=[average_number_of_sides_in_MF_frame]
+    script_data["average_area_in_MF"]+=[average_area_in_MF_frame]
     
 def chemo_mech_iterator(
     sheet,
