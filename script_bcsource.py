@@ -2,11 +2,14 @@
 # use agg backend matplotlib.use('Agg')
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
-sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
-#sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
+#sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
+sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
 #sys.path.insert(0,"/scratch/chixu/tools/tyssue")
 
-#make this main script
+import warnings
+warnings.filterwarnings("ignore")
+
+# add fucntionality of multiple runs in this one do a test of what it is capable of time wize and size wize
 
 import time
 
@@ -16,7 +19,7 @@ import numpy as np
 import json
 import matplotlib
 
-#matplotlib.use("Agg")
+matplotlib.use("Agg")
 import matplotlib.pylab as plt
 import matplotlib.animation as animation
 import ipyvolume as ipv
@@ -51,7 +54,6 @@ except:
     first_realization=True
 
 print(first_realization)
-
 # data collector
 script_data = {}
 # add your desired observable to be defined here
@@ -204,14 +206,13 @@ else:
     dsets = hdf5.load_datasets("./"+load_dir+'/sheet.hf5' )
     specs = config.geometry.planar_sheet()
     sheet = Sheet('periodic', dsets, specs)
-    
-    
 # after loading tyssue i go to res dir for outputs
 os.chdir(name) 
 # Ellipse!
 rx = parameters["rx"]
 sigma = 172.0 / 74.0
 ry = rx * sigma
+
 
 
 if first_realization==True:
@@ -221,6 +222,8 @@ if first_realization==True:
 else:
     pass
 
+
+#
 
 
 PlanarGeometry.update_all(sheet)
@@ -271,11 +274,12 @@ MF_contract = parameters["MF_contract"]
 MF_relax = parameters["MF_relax"]
 MF_init_c = parameters["MF_init_c"]
 
+
+# define boundary source terms carefully since tissue moves
 if first_realization==True: 
     # Initialize morphogens in dataframe
     for N_p, p_name in proteins.items():
-        sheet.face_df.insert(1, p_name, 0.0)
-    # define boundary source terms carefully since tissue moves
+        sheet.face_df.insert(1, p_name, 0.0) 
     sheet.face_df.insert(1, "on_boundary", False)
     for index, row in sheet.edge_df.iterrows():
         if row["opposite"] == -1:
@@ -290,20 +294,8 @@ if first_realization==True:
         if row["x"] > with_axis_offset and row["on_boundary"]:
             sheet.face_df.at[index, "y_boundary_source_term"] = True
             sheet.face_df.at[index, "y_concentration"] = MF_init_c
-            local_edge_df = sheet.edge_df.loc[sheet.edge_df["face"] == index]
-            for index2, row2 in local_edge_df.iterrows():
-                    # check if edge points t0 the boundary, otherwise target the opposite face for some boundary activation
-                    if row2["opposite"]!=-1:
-                        # find opposite edge
-                        nearest_neighbor_edge_index=row2["opposite"]
-                        # find face that edge belongs to
-                        nearest_neighbor_face_index=sheet.edge_df.at[nearest_neighbor_edge_index, "face"]
-                        sheet.face_df.at[nearest_neighbor_face_index, "y_boundary_source_term"] = True
-                        sheet.face_df.at[nearest_neighbor_face_index, "y_concentration"] = MF_init_c
 else:
     1==1
-
-
 
 # Steps=t_f/t_mech evalutation fo mf and div match
 t_mech = parameters["t_mech"]
@@ -331,17 +323,25 @@ Decay_mag = {0: y_dec}
 auto_prod_mag = {0: h_auto, 1: []}
 
 # auto_prod_mag[1] is updated in mech_interaction in the loop
-auto_prod_mag[0] = [
-    -h_auto * (int(row["y_boundary_source_term"]) * 2 - 1)
-    for index, row in sheet.face_df.iterrows()
-]
+
+# depreciated
+#auto_prod_mag[0] = [
+#    -h_auto * (int(row["y_boundary_source_term"]) * 2 - 1)
+#    for index, row in sheet.face_df.iterrows()
+#]
+# end
+auto_prod_mag[0]=h_auto
 # Cell div pars
 
 # Cell grow and divide params
 growth_control_by = parameters["growth_control_by"]
 
 ## Initialize other cell centric variabls not included in tyssue
-if first_realization==True:  
+# global parameter for t_mech steps
+t_mech_time=0
+if first_realization==True: 
+    t_mech_time=0
+    
     cell_vars = {
         "0": "cell_cycle",
         "1": "time_in_cycle",
@@ -363,6 +363,7 @@ if first_realization==True:
     sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
     sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
 else:
+    t_mech_time=len(script_data["cell number"])
     1==1
 # sheet.face_df.insert(1,'on_boundary',False)
 
@@ -422,8 +423,14 @@ def Decay(t, y, i, N_p, mag):
 
 # theta function for all but controlled in such a way to include MF source cells
 def Auto_Production(t, y, i, N_p, row, mag):
-    return theta(y[i + N_p * len(sheet.face_df)], mag[N_p][i])
+    return theta(y[i + N_p * len(sheet.face_df)], mag[N_p])
 
+# 1 if <10hr 0 if >10hrs like fried approx
+def tau():
+    return 1-theta(conversion_t_hr*t_mech_time,10)
+
+def Boundary_flux(t,y,i,N_p,row):
+    return boundary_flux*( int(row["y_boundary_source_term"]) )*tau()
 
 def theta(x, x0):
     if x > x0:
@@ -446,6 +453,7 @@ def cell(t, y):
                 Dif(t, y, index, int(N_p), Dif_mag)
                 + Decay(t, y, index, int(N_p), Decay_mag)
                 + Auto_Production(t, y, index, int(N_p), row, auto_prod_mag)
+                + Boundary_flux(t,y,index,int(N_p),row)
             ]
         # print ("fun")
         # print (fun)
@@ -665,19 +673,20 @@ def mechanical_reaction(tyssue):
     for index, row in sheet.face_df.iterrows():
         if row["x"] > with_axis_offset and row["on_boundary"]:
             sheet.face_df.at[index, "y_boundary_source_term"] = True
-            local_edge_df = sheet.edge_df.loc[sheet.edge_df["face"] == index]
-            for index2, row2 in local_edge_df.iterrows():
-                # check if edge points t0 the boundary, otherwise target the opposite face for some boundary activation
-                if row2["opposite"]!=-1:
-                    # find opposite edge
-                    nearest_neighbor_edge_index=row2["opposite"]
-                    # find face that edge belongs to
-                    nearest_neighbor_face_index=sheet.edge_df.at[nearest_neighbor_edge_index, "face"]
-                    sheet.face_df.at[nearest_neighbor_face_index, "y_boundary_source_term"] = True
-    auto_prod_mag[0] = [
-        -h_auto * (int(row["y_boundary_source_term"]) * 2 - 1)
-        for index, row in sheet.face_df.iterrows()
-    ]
+#            local_edge_df = sheet.edge_df.loc[sheet.edge_df["face"] == index]
+#            for index2, row2 in local_edge_df.iterrows():
+#                # check if edge points t0 the boundary, otherwise target the opposite face for some boundary activation
+#                if row2["opposite"]!=-1:
+#                    # find opposite edge
+#                    nearest_neighbor_edge_index=row2["opposite"]
+#                    # find face that edge belongs to
+#                    nearest_neighbor_face_index=sheet.edge_df.at[nearest_neighbor_edge_index, "face"]
+#                    sheet.face_df.at[nearest_neighbor_face_index, "y_boundary_source_term"] = True
+#    auto_prod_mag[0] = [
+#        h_auto * (int(row["y_boundary_source_term"]) * 2 - 1)
+#        for index, row in sheet.face_df.iterrows()
+#    ]
+# end commented block from local_edge_df
     # auto_prod_mag[1]=[0.0 for i in range(0,sheet.face_df.shape[0])]
     for index, row in sheet.face_df.iterrows():
         # auto_prod_mag[1][index]=1000
@@ -906,13 +915,15 @@ def chemo_mech_iterator(
     # derivative function returns n-value vector args (t,x)
     # plot_function should take only the step number as argument i.e. def visualization(step) : animate_cells2(step,"mech")
     steps = int(kwargs["t_f"]/kwargs["t_mech"])
+    # only proliferation steps
+    steps_proliferation=int(kwargs["t_proliferation"]/kwargs["t_mech"])
     if first_realization==True:
         prev_steps=0
     else:
         prev_steps=len(script_data["cell number"])
-    # only proliferation steps
-    steps_proliferation=int(kwargs["t_proliferation"]/kwargs["t_mech"])
     for i in range(0+steps_proliferation+prev_steps, steps+steps_proliferation+prev_steps):
+        global t_mech_time
+        t_mech_time=i-steps_proliferation
         print(i)
         # time evolve by one t_mech step
         mechanical_reaction(sheet)

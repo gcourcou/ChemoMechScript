@@ -7,7 +7,7 @@ MF_high				1.
 MF_contract			0.7
 MF_relax			1.
 MF_init_c			0.
-boundary_flux			1.
+boundary_flux			0.4
 t_mech 0.04  
 t_f				2000
 t_proliferation			0    
@@ -25,7 +25,7 @@ boundary_tension 0.7
 proliferation_type		area
 proliferation_time_dependent    exponential
 proliferation_magnitude   	1.
-conversion_t_magnitude		1.2
+conversion_t_magnitude		1.32
 long_axis_div			False
 number_of_slice			10
 number_of_slice_pa      10
