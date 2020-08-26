@@ -118,6 +118,15 @@ for item_x in x_data:
 #y_data = np.arange(5,35,5)
 #y_data=np.around(y_data,decimals=1)
 
+dict_y_x_labels={
+'MF speed':[parameter_in_question,"$(μm h^{-1})$"],'MF linearity':[parameter_in_question,"$R^2$"],
+'final average area':[parameter_in_question,"($μm^2$)"],'final area':[parameter_in_question,"($μm^2$)"], 
+'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
+'area':["Time (h)","($μm^2$)"], 'anterior_area':["Time (h)","($μm^2$)"], 'posterior_area':["Time (h)","($μm^2$)"],
+'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"]
+}
+
+
 plot_keys=['MF speed','MF linearity','final average area','final area']
 
 a={}
@@ -133,11 +142,16 @@ for key in plot_keys:
 
 ## plot a time depnendent quanity for many regions in one plot
 plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area']
+
 # plot for a range that correspodns to average t_mechh
 # i use median
 
 plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF', 'MF_shape']
 
+# valid for plot_key_vectors Chi you need to add the rest for plot_key_MF and use them for nice plot
+#dict_y_x_labels={'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
+#'area':["Time (h)","($μm^2$)"], 'anterior_area':["Time (h)","($μm^2$)"], 'posterior_area':["Time (h)","($μm^2$)"]
+#}
 for key in plot_keys_vectors:
     plt.figure()
     # store length of array with time dep quantity
@@ -170,6 +184,9 @@ for key in plot_keys_vectors:
     print(str(key) + " time dep plot x range is " )
     print(x_range_up)
     print(x_range_down)
+    # y and x labes dict_y_x_labels holds a list of labels [xlabel,ylabel]
+    plt.xlabel(dict_y_x_labels[key][0])
+    plt.ylabel(dict_y_x_labels[key][1])
     plt.savefig("cross_plot_"+str(key)+".png")
     plt.close()
 ## end time dep plot
@@ -206,6 +223,9 @@ for key in plot_keys_MF:
     print(str(key) + " time dep plot x range is " )
     print(x_range_up)
     print(x_range_down)
+    # x y labbesl from dict
+    plt.xlabel(dict_y_x_labels[key][0])
+    plt.ylabel(dict_y_x_labels[key][1])
     plt.savefig("cross_plot_"+str(key)+".png")
     plt.close()
 
@@ -217,6 +237,9 @@ for key in plot_keys:
         plt.scatter(item_x,store[item_x][key],color=colour_data[item_x])
     #plt.plot(x_data,a[key],'.')
     plt.title(str(key))
+    # x y labels from dict
+    plt.xlabel(dict_y_x_labels[key][0])
+    plt.ylabel(dict_y_x_labels[key][1])
     plt.savefig("cross_plot_"+str(key)+".png")
     plt.close()
     
