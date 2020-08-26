@@ -2,10 +2,12 @@
 # use agg backend matplotlib.use('Agg')
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
-sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
-#sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
+#sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
+sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
 #sys.path.insert(0,"/scratch/chixu/tools/tyssue")
 
+import warnings
+warnings.filterwarnings("ignore")
 
 # add fucntionality of multiple runs in this one do a test of what it is capable of time wize and size wize
 
@@ -17,7 +19,7 @@ import numpy as np
 import json
 import matplotlib
 
-#matplotlib.use("Agg")
+matplotlib.use("Agg")
 import matplotlib.pylab as plt
 import matplotlib.animation as animation
 import ipyvolume as ipv
@@ -59,7 +61,7 @@ script_data = {}
 # append values at will, preferably in data_out step 
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
-                  "Remenant area"]
+                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -451,7 +453,6 @@ def cell(t, y):
                 Dif(t, y, index, int(N_p), Dif_mag)
                 + Decay(t, y, index, int(N_p), Decay_mag)
                 + Auto_Production(t, y, index, int(N_p), row, auto_prod_mag)
-                + Boundary_flux(t,y,index,int(N_p),row)
             ]
         # print ("fun")
         # print (fun)
@@ -900,6 +901,33 @@ def data_collection(i, tyssue):
             remenant_area+=row["time_for_growth"]-0.5
     script_data["Remenant area"]+=[remenant_area]
     
+    average_number_of_sides_in_MF_frame = 0.0
+    total_number_of_sides_in_MF_frame = 0
+    number_of_cells_in_MF_frame = 0
+    total_area_in_MF_frame = 0.0
+    average_area_in_MF_frame = 0.0
+    MF_shape_frame = 0.0
+    total_MF_dev = 0.0
+    for index,row in sheet.face_df.iterrows():
+        if row["population_variable"] == "MF":
+            number_of_cells_in_MF_frame += 1
+            total_number_of_sides_in_MF_frame += row["num_sides"]
+            total_area_in_MF_frame += row["area"]
+            total_MF_dev += (MF_mean_xpos-row["x"])*(MF_mean_xpos-row["x"])
+    if number_of_cells_in_MF_frame == 0:
+        average_number_of_sides_in_MF_frame = 0.0
+        average_area_in_MF_frame = 0.0
+        MF_shape_frame = 0.0
+    else:
+        average_number_of_sides_in_MF_frame = total_number_of_sides_in_MF_frame/number_of_cells_in_MF_frame
+        average_area_in_MF_frame = total_area_in_MF_frame/number_of_cells_in_MF_frame
+        MF_shape_frame = np.sqrt(total_MF_dev)/number_of_cells_in_MF_frame
+        if np.isnan(MF_shape_frame):
+            MF_shape_frame = 0.0
+    script_data["average_number_of_sides_in_MF"]+=[average_number_of_sides_in_MF_frame]
+    script_data["average_area_in_MF"]+=[average_area_in_MF_frame]
+    script_data["MF_shape"]+=[MF_shape_frame]
+    
 def chemo_mech_iterator(
     sheet,
     initial_concentration,
@@ -1009,3 +1037,4 @@ script_data_stamp()
 
 # move back up for the sake of organization
 os.chdir("..")
+
