@@ -14,6 +14,7 @@ import numpy as np
 from scipy.stats import chisquare
 
 from sklearn.metrics import r2_score
+from numpy import nan
 
 #scipy.stats.chisquare(f_obs, f_exp=None, ddof=0, axis=0)
 #### Input parameters and define functions for estimations
@@ -90,6 +91,8 @@ def analyze(bottom="./"):
     plot_area_keys=["tissue area","Posterior area","Anterior area"]
     #names used for plots
     plot_area_names=["Total area","Posterior area","Anterior area"]
+    plot_number_of_sides_in_MF=["average_number_of_sides_in_MF", "MF_shape"]
+    plot_area_in_MF=["average_area_in_MF"]
     for i in range(0,len(plot_area_keys)):
         key=plot_area_keys[i]
         yname=plot_area_names[i]
@@ -98,6 +101,36 @@ def analyze(bottom="./"):
         plt.xlabel("Time (h)")
         area=np.array(dict_from_file[key])/((conversion_r)**2)
         plt.plot(time_array,area,'.')
+        plt.savefig(yname+"_vs_time.png")
+        plt.close()
+    for i in range(0,len(plot_number_of_sides_in_MF)):
+        key=plot_number_of_sides_in_MF[i]
+        yname="average_number_of_sides_in_MF"
+        plt.figure()
+        plt.ylabel(yname+" ($μm^2$)")
+        plt.xlabel("Time (h)")
+        ylist = []
+        time_array_1 = []
+        for i in range(0, len(time_array)):
+            if dict_from_file[key][i] != 0.0 and np.isnan(dict_from_file[key][i]) != True:
+                ylist += [dict_from_file[key][i]]
+                time_array_1 += [time_array[i]]
+        plt.plot(time_array_1,ylist,'.')
+        plt.savefig(yname+"_vs_time.png")
+        plt.close()
+    for i in range(0,len(plot_area_in_MF)):
+        key=plot_area_in_MF[i]
+        yname="average_area_in_MF"
+        plt.figure()
+        plt.ylabel(yname+" ($μm^2$)")
+        plt.xlabel("Time (h)")
+        area= []
+        time_array_1 = []
+        for i in range(0, len(time_array)):
+            if dict_from_file[key][i] != 0.0 and np.isnan(dict_from_file[key][i]) != True:
+                area += [dict_from_file[key][i]/((conversion_r)**2)]
+                time_array_1 += [time_array[i]]
+        plt.plot(time_array_1,area,'.')
         plt.savefig(yname+"_vs_time.png")
         plt.close()
 #    area=np.array(dict_from_file["tissue area"])/((conversion_r)**2)
@@ -196,6 +229,24 @@ def analyze(bottom="./"):
     out_dict['area']        =area
     out_dict['posterior_area']=posterior_area
     out_dict['anterior_area']=anterior_area
+    
+    ave_num_sides_MF = []
+    for i in range (0, len(dict_from_file["average_number_of_sides_in_MF"])):
+        if dict_from_file["average_number_of_sides_in_MF"][i] != 0.0 and np.isnan(dict_from_file["average_number_of_sides_in_MF"][i]) != True:
+            ave_num_sides_MF += [dict_from_file["average_number_of_sides_in_MF"][i]]
+    out_dict['average_number_of_sides_in_MF']=ave_num_sides_MF
+
+    ave_area_MF = []
+    for i in range(0, len(dict_from_file["average_area_in_MF"])):
+        if dict_from_file["average_area_in_MF"][i] != 0.0 and np.isnan(dict_from_file["average_area_in_MF"][i]) != True:
+            ave_area_MF += [ dict_from_file["average_area_in_MF"][i]/((conversion_r)**2) ]
+    out_dict['average_area_in_MF'] = ave_area_MF
+    
+    MF_shape = []
+    for i in range(0, len(dict_from_file["MF_shape"])):
+        if dict_from_file["MF_shape"][i] != 0.0 and np.isnan(dict_from_file["MF_shape"][i]) != True:
+                MF_shape += [ dict_from_file["MF_shape"][i] ]
+    out_dict['MF_shape'] = MF_shape
 
     out_dict['parameters']=parameters
     MF_last=dict_from_file['MF position'][-1]
@@ -212,23 +263,3 @@ def analyze(bottom="./"):
 
 
 #print(analyze())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

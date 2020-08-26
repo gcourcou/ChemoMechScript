@@ -61,7 +61,7 @@ script_data = {}
 # append values at will, preferably in data_out step 
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
-                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF"]
+                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -907,19 +907,27 @@ def data_collection(i, tyssue):
     number_of_cells_in_MF_frame = 0
     total_area_in_MF_frame = 0.0
     average_area_in_MF_frame = 0.0
+    MF_shape_frame = 0.0
+    total_MF_dev = 0.0
     for index,row in sheet.face_df.iterrows():
         if row["population_variable"] == "MF":
             number_of_cells_in_MF_frame += 1
             total_number_of_sides_in_MF_frame += row["num_sides"]
             total_area_in_MF_frame += row["area"]
+            total_MF_dev += (MF_mean_xpos-row["x"])*(MF_mean_xpos-row["x"])
     if number_of_cells_in_MF_frame == 0:
         average_number_of_sides_in_MF_frame = 0.0
         average_area_in_MF_frame = 0.0
+        MF_shape_frame = 0.0
     else:
         average_number_of_sides_in_MF_frame = total_number_of_sides_in_MF_frame/number_of_cells_in_MF_frame
         average_area_in_MF_frame = total_area_in_MF_frame/number_of_cells_in_MF_frame
+        MF_shape_frame = np.sqrt(total_MF_dev)/number_of_cells_in_MF_frame
+        if np.isnan(MF_shape_frame):
+            MF_shape_frame = 0.0
     script_data["average_number_of_sides_in_MF"]+=[average_number_of_sides_in_MF_frame]
     script_data["average_area_in_MF"]+=[average_area_in_MF_frame]
+    script_data["MF_shape"]+=[MF_shape_frame]
     
 def chemo_mech_iterator(
     sheet,
@@ -1030,3 +1038,4 @@ script_data_stamp()
 
 # move back up for the sake of organization
 os.chdir("..")
+
