@@ -251,7 +251,7 @@ draw_specs["vert"]["visible"] = False
 draw_specs["edge"]["head_width"] = 0.1
 coords = ["x", "y"]
 sheet.face_df["col"] = np.linspace(0.0, 1.0, num=sheet.face_df.shape[0])
-cmap = plt.cm.get_cmap("viridis")
+cmap = plt.cm.get_cmap("hot")
 color_cmap = cmap(sheet.face_df.col)
 draw_specs["face"]["visible"] = True
 draw_specs["face"]["color"] = color_cmap
