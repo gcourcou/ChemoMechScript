@@ -251,7 +251,7 @@ draw_specs["vert"]["visible"] = False
 draw_specs["edge"]["head_width"] = 0.1
 coords = ["x", "y"]
 sheet.face_df["col"] = np.linspace(0.0, 1.0, num=sheet.face_df.shape[0])
-cmap = plt.cm.get_cmap("hot")
+cmap = plt.cm.get_cmap("viridis")
 color_cmap = cmap(sheet.face_df.col)
 draw_specs["face"]["visible"] = True
 draw_specs["face"]["color"] = color_cmap
@@ -465,7 +465,7 @@ def animate_cells2(timer, chem_name, string):
     plt.clf()
     # sheet.face_df['col'] = np.array([ sol.y[i][-1] for i in range(0,sheet.face_df.shape[0]) ])
     sheet.face_df["col"] = sheet.face_df[chem_name]
-    cmap = plt.cm.get_cmap("hot")
+    cmap = plt.cm.get_cmap("viridis")
     color_cmap = cmap(sheet.face_df.col)
     draw_specs["face"]["color"] = color_cmap
     draw_specs["face"]["color_bar"] = True
@@ -495,7 +495,7 @@ def animate_cells_MF(timer, chem_name, string):
         ]
     )
     # sheet.face_df['col'] = sheet.face_df[chem_name]
-    cmap = plt.cm.get_cmap("hot")
+    cmap = plt.cm.get_cmap("viridis")
     color_cmap = cmap(sheet.face_df.col)
     draw_specs["face"]["color"] = color_cmap
     draw_specs["face"]["color_bar"] = True
