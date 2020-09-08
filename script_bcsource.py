@@ -495,7 +495,7 @@ def animate_cells_MF(timer, chem_name, string):
         ]
     )
     # sheet.face_df['col'] = sheet.face_df[chem_name]
-    cmap = plt.cm.get_cmap("viridis")
+    cmap = plt.cm.get_cmap("hot")
     color_cmap = cmap(sheet.face_df.col)
     draw_specs["face"]["color"] = color_cmap
     draw_specs["face"]["color_bar"] = True
