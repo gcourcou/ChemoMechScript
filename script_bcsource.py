@@ -465,7 +465,7 @@ def animate_cells2(timer, chem_name, string):
     plt.clf()
     # sheet.face_df['col'] = np.array([ sol.y[i][-1] for i in range(0,sheet.face_df.shape[0]) ])
     sheet.face_df["col"] = sheet.face_df[chem_name]
-    cmap = plt.cm.get_cmap("viridis")
+    cmap = plt.cm.get_cmap("hot")
     color_cmap = cmap(sheet.face_df.col)
     draw_specs["face"]["color"] = color_cmap
     draw_specs["face"]["color_bar"] = True
@@ -477,7 +477,7 @@ def animate_cells2(timer, chem_name, string):
     # fig, ax= sheet_view(sheet, coords, **draw_specs)
     fig, ax1, ax2 = sheet_view_GC_colorbar(sheet, coords, **draw_specs)
     fig.set_size_inches(6, 6)
-    fig.suptitle(chem_name + " frame " + str(timer), fontsize=14)
+    fig.suptitle(chem_name + " frame " + str(timer*conversion_t_hr), fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
     # plt.axis('off')
@@ -650,6 +650,8 @@ def mf_inf_cell(
 
 def visualization(i):
     animate_cells2(i, "y_concentration", "mech")
+    animate_cells2(i, "area", "mech")
+    animate_cells2(i, "num_sides", "mech")
     animate_cells_MF(i, "y_concentration", "MF")
     plot_chem(i, "y_concentration", "MFvsx")
     plot_chem(i, "area", "areavsx")
