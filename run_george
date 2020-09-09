@@ -7,6 +7,6 @@ conda activate only_deps
 conda list
 which python
 export HDF5_USE_FILE_LOCKING='FALSE'
-python script_bcsource.py 0
+python script_bcsource.py out_0
 
 
