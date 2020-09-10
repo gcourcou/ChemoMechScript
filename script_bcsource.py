@@ -362,7 +362,10 @@ if first_realization==True:
     
     # Initialize params for aegerter growth
     sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
-    sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
+    if parameters["random_init_cycle"]=="Yes":
+        sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
+    elif parameters["random_init_cycle"]=="No":
+        sheet.face_df[ "time_for_growth"]=parameters["cycle_magnitude"]+np.zeros( sheet.face_df.shape[0] )
 else:
     t_mech_time=len(script_data["cell number"])
     1==1
@@ -478,7 +481,7 @@ def animate_cells2(timer, chem_name, string):
     # fig, ax= sheet_view(sheet, coords, **draw_specs)
     fig, ax1, ax2 = sheet_view_GC_colorbar(sheet, coords, **draw_specs)
     fig.set_size_inches(6, 6)
-    fig.suptitle(chem_name + " frame " + str(timer*conversion_t_hr), fontsize=14)
+    fig.suptitle(chem_name + " frame " + str(timer*conversion_t_hr*t_plot), fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
     # plt.axis('off')
@@ -569,6 +572,8 @@ def plot_chem(timer, chem_name, string):
     plt.plot(bin_x, average_chem, "rx") 
     
     plt.title(chem_name + " vs A-P position " + str(timer) + "centered " + str(val))
+    if chem_name=="area":
+        plt.ylim(0.0,0.8)
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png")
     # plt.axis('off')
     # plt.show()
