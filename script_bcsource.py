@@ -61,7 +61,8 @@ script_data = {}
 # append values at will, preferably in data_out step 
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
-                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape"]
+                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape",
+                  "Posterior cell number", "Anterior cell number"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -838,15 +839,23 @@ def data_collection(i, tyssue):
     #tissue_length += [ [Lmax,Lmin]  ]
     # rep 5
     
+    # cell num
+    P_cell_sum=0
+    A_cell_sum=0
+    # area
     P_area_sum = 0.0
     A_area_sum = 0.0
     for index, row in sheet.face_df.iterrows():
         if row["population_variable"] == "P":
             P_area_sum += row["area"]
+            P_cell_sum += 1
         elif row["population_variable"] == "A":
             A_area_sum += row["area"]
-    
+            A_cell_sum += 1
     # rep 6,7
+    script_data["Posterior cell number"] += [P_cell_sum]
+    script_data["Anterior cell number"]  += [A_cell_sum]
+
     script_data["Posterior area"]+=[P_area_sum]
     script_data["Anterior area"]+=[A_area_sum]
     #P_area += [P_area_sum]
