@@ -58,24 +58,29 @@ for root, dirs, files in os.walk(".", topdown=False):
       1==1
       #print(os.path.join(root, name))
    for name in dirs:
-      if root.count(os.sep) == CUTOFF_DEPTH-1:
+      print("dirs:")
+      print(dirs)
+      if root.count(os.sep) == CUTOFF_DEPTH-1 and name != ".git":
           #print(os.path.join(root, name))
           targets+=[os.path.join(root, name)[1:]]
-      
-#print(targets)
+print("targets:")
+print(targets)
 store={}
 parameter_in_question="MF_contract"
 for directory in targets:
     if directory[-1]!="_":
         os.chdir(top_dir+directory)
         print(str(directory))
-        temp=analyze(bottom="out_0/")
+        temp=analyze(bottom="0/")
         # touple
         param=np.around(temp['parameters'][parameter_in_question],decimals=2)
         store[param]=temp
         #print(os.listdir())
 
-print(store)
+
+#print(store)
+print("store keys:")
+print(store.keys())
 
 #return to top dir
 os.chdir(top_dir)
@@ -97,7 +102,7 @@ os.chdir(top_dir)
 
 # zero was not valid
 #x_data = np.arange(.1,.9,.1)
-x_data=[.4 + 0.1*(i) for i in range(0,7)]  
+x_data=[.1 + 0.1*(i) for i in range(0,10)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
@@ -120,14 +125,15 @@ for item_x in x_data:
 
 dict_y_x_labels={
 'MF speed':[parameter_in_question,"$(μm h^{-1})$"],'MF linearity':[parameter_in_question,"$R^2$"],
-'final average area':[parameter_in_question,"($μm^2$)"],'final area':[parameter_in_question,"($μm^2$)"], 
+'final average area':[parameter_in_question,"($μm^2$)"],'final area':[parameter_in_question,"($μm^2$)"],'total_mitotic_number':[parameter_in_question, " "], 
 'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
 'area':["Time (h)","($μm^2$)"], 'anterior_area':["Time (h)","($μm^2$)"], 'posterior_area':["Time (h)","($μm^2$)"],
-'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"]
+'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"], 'area_ratio':["Time (h)","ratio(in/out)"],
+'average_posterior_area':["Time (h)", "($μm^2$)"], 'mitotic_frequency':["relative position to MF", "frequency"]
 }
 
 
-plot_keys=['MF speed','MF linearity','final average area','final area']
+plot_keys=['MF speed','MF linearity','final average area','final area','total_mitotic_number']
 
 a={}
 for key in plot_keys:
@@ -146,7 +152,7 @@ plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area']
 # plot for a range that correspodns to average t_mechh
 # i use median
 
-plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF', 'MF_shape']
+plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF', 'MF_shape', 'area_ratio', 'average_posterior_area', 'mitotic_frequency']
 
 # valid for plot_key_vectors Chi you need to add the rest for plot_key_MF and use them for nice plot
 #dict_y_x_labels={'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
@@ -242,6 +248,7 @@ for key in plot_keys:
     plt.ylabel(dict_y_x_labels[key][1])
     plt.savefig("cross_plot_"+str(key)+".png")
     plt.close()
+
     
 #test = np.random.random((6, 5))
 #

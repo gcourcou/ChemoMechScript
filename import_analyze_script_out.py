@@ -16,6 +16,9 @@ from scipy.stats import chisquare
 from sklearn.metrics import r2_score
 from numpy import nan
 
+from mitotic_frequency import mitotic_frequency_sum
+from mitotic_frequency import shape_frequency
+from mitotic_frequency import mitotic_number
 #scipy.stats.chisquare(f_obs, f_exp=None, ddof=0, axis=0)
 #### Input parameters and define functions for estimations
 
@@ -88,10 +91,19 @@ def analyze(bottom="./"):
     conversion_t_hr=conversion_t*0.000277778
     #hr/t_mech
     time_array=np.arange(0,len(dict_from_file["tissue area"]))*conversion_t_hr
+    
+    
+    mitotic_frequency_list = mitotic_frequency_sum(dict_from_file,division_type="uniform", interval=20)
+    
+    shape_frequency(dict_from_file,division_type="uniform",interval=20)
+    
+    total_mitotic_number = mitotic_number(dict_from_file)
+    
     plot_area_keys=["tissue area","Posterior area","Anterior area"]
     #names used for plots
     plot_area_names=["Total area","Posterior area","Anterior area"]
     plot_number_of_sides_in_MF=["average_number_of_sides_in_MF", "MF_shape"]
+    plot_area_MF_P=["average_area_in_MF", "average_posterior_area"]
     plot_area_in_MF=["average_area_in_MF"]
     for i in range(0,len(plot_area_keys)):
         key=plot_area_keys[i]
@@ -105,32 +117,47 @@ def analyze(bottom="./"):
         plt.close()
     for i in range(0,len(plot_number_of_sides_in_MF)):
         key=plot_number_of_sides_in_MF[i]
-        yname="average_number_of_sides_in_MF"
+        yname=key
         plt.figure()
-        plt.ylabel(yname+" ($μm^2$)")
+        plt.ylabel(yname)
         plt.xlabel("Time (h)")
         ylist = []
         time_array_1 = []
-        for i in range(0, len(time_array)):
-            if dict_from_file[key][i] != 0.0 and np.isnan(dict_from_file[key][i]) != True:
-                ylist += [dict_from_file[key][i]]
-                time_array_1 += [time_array[i]]
+        for j in range(0, len(time_array)):
+            if dict_from_file[key][j] != 0.0 and np.isnan(dict_from_file[key][j]) != True:
+                ylist += [dict_from_file[key][j]]
+                time_array_1 += [time_array[j]]
         plt.plot(time_array_1,ylist,'.')
         plt.savefig(yname+"_vs_time.png")
         plt.close()
-    for i in range(0,len(plot_area_in_MF)):
-        key=plot_area_in_MF[i]
-        yname="average_area_in_MF"
+    for i in range(0,len(plot_area_MF_P)):
+        key=plot_area_MF_P[i]
+        yname=key
         plt.figure()
         plt.ylabel(yname+" ($μm^2$)")
         plt.xlabel("Time (h)")
         area= []
         time_array_1 = []
-        for i in range(0, len(time_array)):
-            if dict_from_file[key][i] != 0.0 and np.isnan(dict_from_file[key][i]) != True:
-                area += [dict_from_file[key][i]/((conversion_r)**2)]
-                time_array_1 += [time_array[i]]
+        for j in range(0, len(time_array)):
+            if dict_from_file[key][j] != 0.0 and np.isnan(dict_from_file[key][j]) != True:
+                area += [dict_from_file[key][j]/((conversion_r)**2)]
+                time_array_1 += [time_array[j]]
         plt.plot(time_array_1,area,'.')
+        plt.savefig(yname+"_vs_time.png")
+        plt.close()
+    for i in range(0,len(plot_area_in_MF)):
+        key=plot_area_in_MF[i]
+        yname="area_ratio"
+        plt.figure()
+        plt.ylabel(yname+"in_MF/out_MF")
+        plt.xlabel("Time (h)")
+        area_ratio = []
+        time_array_1 = []
+        for j in range(0, len(time_array)):
+            if dict_from_file[key][j] != 0.0 and np.isnan(dict_from_file[key][j]) != True:
+                area_ratio += [dict_from_file[key][j]/dict_from_file["average_area_out_MF"][j]]
+                time_array_1 += [time_array[j]]
+        plt.plot(time_array_1,area_ratio,'.')
         plt.savefig(yname+"_vs_time.png")
         plt.close()
 #    area=np.array(dict_from_file["tissue area"])/((conversion_r)**2)
@@ -237,10 +264,19 @@ def analyze(bottom="./"):
     out_dict['average_number_of_sides_in_MF']=ave_num_sides_MF
 
     ave_area_MF = []
+    ave_area_out_MF = []
+    area_ratio = []
+    ave_posterior_area = []
     for i in range(0, len(dict_from_file["average_area_in_MF"])):
         if dict_from_file["average_area_in_MF"][i] != 0.0 and np.isnan(dict_from_file["average_area_in_MF"][i]) != True:
             ave_area_MF += [ dict_from_file["average_area_in_MF"][i]/((conversion_r)**2) ]
+            ave_area_out_MF += [ dict_from_file["average_area_out_MF"][i]/((conversion_r)**2) ]
+            area_ratio += [dict_from_file["average_area_in_MF"][i]/dict_from_file["average_area_out_MF"][i]]
+            ave_posterior_area += [dict_from_file["average_posterior_area"]/((conversion_r)**2) ]
     out_dict['average_area_in_MF'] = ave_area_MF
+    out_dict['average_area_out_MF'] = ave_area_out_MF
+    out_dict['area_ratio'] = area_ratio
+    out_dict['average_posterior_area'] = ave_posterior_area
     
     MF_shape = []
     for i in range(0, len(dict_from_file["MF_shape"])):
@@ -253,6 +289,10 @@ def analyze(bottom="./"):
     
     out_dict['Lp']=Lp
     out_dict['La']=La
+    
+    out_dict["mitotic_frequency"] = mitotic_frequency_list
+    out_dict["total_mitotic_number"] = total_mitotic_number
+    
     if MF_last==0.0:
         out_dict['finished']=True
     else:
