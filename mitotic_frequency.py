@@ -98,7 +98,7 @@ def  mitotic_frequency_sum(dict_from_file,division_type="uniform",interval=2) :
 #        print("cell number in strip is:")
 #        print(dict_from_file["cell_number_in_strip"][i])
         #plt.hist(mitotic_position_relative_to_MF, range=[-0.2,1.1],bins=23,alpha=0.45,fill=False,density=True)
-        color = plt.cm.jet((w-color_min_c)/(color_saturation_c-color_min_c))
+        color = plt.cm.jet((w*conversion_t_hr-color_min_c)/(color_saturation_c-color_min_c))
         x_interval = 1/number_of_slice
         xlist = []
         for i in range (0, number_of_slice):
