@@ -102,7 +102,7 @@ os.chdir(top_dir)
 
 # zero was not valid
 #x_data = np.arange(.1,.9,.1)
-x_data=[.1 + 0.1*(i) for i in range(0,10)]  
+x_data=[.4 + 0.1*(i) for i in range(0,7)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
