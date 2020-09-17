@@ -97,7 +97,7 @@ os.chdir(top_dir)
 
 # zero was not valid
 #x_data = np.arange(.1,.9,.1)
-x_data=[.4 + 0.1*(i) for i in range(0,7)]  
+x_data=[.1 + 0.1*(i) for i in range(0,10)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
@@ -120,14 +120,17 @@ for item_x in x_data:
 
 dict_y_x_labels={
 'MF speed':[parameter_in_question,"$(μm h^{-1})$"],'MF linearity':[parameter_in_question,"$R^2$"],
-'final average area':[parameter_in_question,"($μm^2$)"],'final area':[parameter_in_question,"($μm^2$)"], 
+'final average area':[parameter_in_question,"($μm^2$)"],'final area':[parameter_in_question,"($μm^2$)"],
+'average_anterior_cell_area':[parameter_in_question,"($μm^2$)"],'average_posterior_cell_area':[parameter_in_question,"($μm^2$)"], 
 'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
 'area':["Time (h)","($μm^2$)"], 'anterior_area':["Time (h)","($μm^2$)"], 'posterior_area':["Time (h)","($μm^2$)"],
-'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"]
+'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"],
+'anterior_cell_area':["Time (h)","($μm^2$)"],'posterior_cell_area':["Time (h)","($μm^2$)"],
+    'cell number':["Time (h)","Cell Number"]
 }
 
 
-plot_keys=['MF speed','MF linearity','final average area','final area']
+plot_keys=['MF speed','MF linearity','final average area','final area','average_anterior_cell_area','average_posterior_cell_area']
 
 a={}
 for key in plot_keys:
@@ -141,7 +144,7 @@ for key in plot_keys:
     a[key]+=[temp][0]
 
 ## plot a time depnendent quanity for many regions in one plot
-plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area']
+plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area','anterior_cell_area','posterior_cell_area','cell number']
 
 # plot for a range that correspodns to average t_mechh
 # i use median

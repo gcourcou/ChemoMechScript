@@ -230,6 +230,27 @@ def analyze(bottom="./"):
     out_dict['posterior_area']=posterior_area
     out_dict['anterior_area']=anterior_area
     
+    posterior_cell_area=[]
+    anterior_cell_area=[]
+    for i in range(0,len(posterior_area)):
+        cn=dict_from_file["Posterior cell number"][i]
+        if cn==0:
+                posterior_cell_area+=[0]
+        else:
+                posterior_cell_area+=[posterior_area[i]/cn]
+        cn=dict_from_file["Anterior cell number"][i]
+        if cn==0:
+                anterior_cell_area+=[0]
+        else:
+                anterior_cell_area+=[anterior_area[i]/cn]
+    out_dict['posterior_cell_area']=posterior_cell_area
+    out_dict['anterior_cell_area']=anterior_cell_area
+    # This average is not perfect
+    # it includes zeroes, where proliferation ended, and simulation static result. 
+    # perhaps we need to stop the simulation when MF reaches anterior to avoid this
+    out_dict['average_posterior_cell_area']=np.average(posterior_cell_area)
+    out_dict['average_anterior_cell_area']=np.average(anterior_cell_area)
+    
     ave_num_sides_MF = []
     for i in range (0, len(dict_from_file["average_number_of_sides_in_MF"])):
         if dict_from_file["average_number_of_sides_in_MF"][i] != 0.0 and np.isnan(dict_from_file["average_number_of_sides_in_MF"][i]) != True:
@@ -253,6 +274,10 @@ def analyze(bottom="./"):
     
     out_dict['Lp']=Lp
     out_dict['La']=La
+    out_dict["Posterior cell number"]=dict_from_file["Posterior cell number"]
+    out_dict["Anterior cell number"]=dict_from_file["Anterior cell number"]
+    out_dict["cell number"]=dict_from_file["cell number"]
+
     if MF_last==0.0:
         out_dict['finished']=True
     else:
