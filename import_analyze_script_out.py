@@ -245,30 +245,31 @@ def analyze(bottom="./"):
     anterior_cell_area=[]
     posterior_area_average_sum=0.0
     anterior_area_average_sum=0.0
-    non_zero_frame_p = 0
-    non_zero_frame_a = 0
+    non_zero_frame = 0
     for i in range(0,len(posterior_area)):
-        cn=dict_from_file["Posterior cell number"][i]
-        if cn==0:
+        pn=dict_from_file["Posterior cell number"][i]
+        if pn==0:
                 posterior_cell_area+=[0]
         else:
-                posterior_cell_area+=[posterior_area[i]/cn]
-                posterior_area_average_sum+=posterior_cell_area
-                non_zero_frame_p += 1
-        cn=dict_from_file["Anterior cell number"][i]
-        if cn==0:
+                posterior_cell_area+=[posterior_area[i]/pn]
+                
+        an=dict_from_file["Anterior cell number"][i]
+        if an==0:
                 anterior_cell_area+=[0]
         else:
-                anterior_cell_area+=[anterior_area[i]/cn]
-                anterior_area_average_sum+=anterior_cell_area
-                non_zero_frame_a += 1
+                anterior_cell_area+=[anterior_area[i]/an]
+        if an != 0 and pn != 0:
+            posterior_area_average_sum+=posterior_cell_area
+            anterior_area_average_sum+=anterior_cell_area
+            non_zero_frame += 1
+            
     out_dict['posterior_cell_area']=posterior_cell_area
     out_dict['anterior_cell_area']=anterior_cell_area
     # This average is not perfect
     # it includes zeroes, where proliferation ended, and simulation static result. 
     # perhaps we need to stop the simulation when MF reaches anterior to avoid this
-    out_dict['average_posterior_cell_area']=posterior_area_average_sum/non_zero_frame_p
-    out_dict['average_anterior_cell_area']=anterior_area_average_sum/non_zero_frame_a
+    out_dict['average_posterior_cell_area']=posterior_area_average_sum/non_zero_frame
+    out_dict['average_anterior_cell_area']=anterior_area_average_sum/non_zero_frame
 
     
     ave_num_sides_MF = []
