@@ -61,7 +61,8 @@ script_data = {}
 # append values at will, preferably in data_out step 
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
-                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","average_area_out_MF","MF_shape", "average_posterior_area"]
+                  "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape",
+                  "Posterior cell number", "Anterior cell number"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -361,7 +362,10 @@ if first_realization==True:
     
     # Initialize params for aegerter growth
     sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
-    sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
+    if parameters["random_init_cycle"]=="Yes":
+        sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
+    elif parameters["random_init_cycle"]=="No":
+        sheet.face_df[ "time_for_growth"]=parameters["cycle_magnitude"]+np.zeros( sheet.face_df.shape[0] )
 else:
     t_mech_time=len(script_data["cell number"])
     1==1
@@ -477,7 +481,7 @@ def animate_cells2(timer, chem_name, string):
     # fig, ax= sheet_view(sheet, coords, **draw_specs)
     fig, ax1, ax2 = sheet_view_GC_colorbar(sheet, coords, **draw_specs)
     fig.set_size_inches(6, 6)
-    fig.suptitle(chem_name + " frame " + str(timer), fontsize=14)
+    fig.suptitle(chem_name + " frame " + str(timer*conversion_t_hr*t_plot), fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
     # plt.axis('off')
@@ -567,10 +571,9 @@ def plot_chem(timer, chem_name, string):
 
     plt.plot(bin_x, average_chem, "rx") 
     
-    if string == "area":
-        plt.ylim(0.0,0.8)
-    
     plt.title(chem_name + " vs A-P position " + str(timer) + "centered " + str(val))
+    if chem_name=="area":
+        plt.ylim(0.0,0.8)
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png")
     # plt.axis('off')
     # plt.show()
@@ -653,6 +656,8 @@ def mf_inf_cell(
 
 def visualization(i):
     animate_cells2(i, "y_concentration", "mech")
+    animate_cells2(i, "area", "mech")
+    animate_cells2(i, "num_sides", "mech")
     animate_cells_MF(i, "y_concentration", "MF")
     plot_chem(i, "y_concentration", "MFvsx")
     plot_chem(i, "area", "areavsx")
@@ -839,20 +844,23 @@ def data_collection(i, tyssue):
     #tissue_length += [ [Lmax,Lmin]  ]
     # rep 5
     
+    # cell num
+    P_cell_sum=0
+    A_cell_sum=0
+    # area
     P_area_sum = 0.0
     A_area_sum = 0.0
-    number_of_cell_in_P = 0
     for index, row in sheet.face_df.iterrows():
         if row["population_variable"] == "P":
             P_area_sum += row["area"]
-            number_of_cell_in_P += 1
+            P_cell_sum += 1
         elif row["population_variable"] == "A":
             A_area_sum += row["area"]
-    if number_of_cell_in_P != 0:
-        script_data["average_posterior_area"] += [P_area_sum/number_of_cell_in_P]
-    else:
-        script_data["average_posterior_area"] += [0.0]
+            A_cell_sum += 1
     # rep 6,7
+    script_data["Posterior cell number"] += [P_cell_sum]
+    script_data["Anterior cell number"]  += [A_cell_sum]
+
     script_data["Posterior area"]+=[P_area_sum]
     script_data["Anterior area"]+=[A_area_sum]
     #P_area += [P_area_sum]
@@ -913,11 +921,8 @@ def data_collection(i, tyssue):
     average_number_of_sides_in_MF_frame = 0.0
     total_number_of_sides_in_MF_frame = 0
     number_of_cells_in_MF_frame = 0
-    number_of_cells_out_MF_frame = 0
     total_area_in_MF_frame = 0.0
-    total_area_out_MF_frame = 0.0
     average_area_in_MF_frame = 0.0
-    average_area_out_MF_frame = 0.0
     MF_shape_frame = 0.0
     total_MF_dev = 0.0
     for index,row in sheet.face_df.iterrows():
@@ -926,13 +931,6 @@ def data_collection(i, tyssue):
             total_number_of_sides_in_MF_frame += row["num_sides"]
             total_area_in_MF_frame += row["area"]
             total_MF_dev += (MF_mean_xpos-row["x"])*(MF_mean_xpos-row["x"])
-        else:
-            number_of_cells_out_MF_frame += 1
-            total_area_out_MF_frame += row["area"]
-    if number_of_cells_out_MF_frame == 0:
-        average_area_out_MF_frame == 0.0
-    else:
-        average_area_out_MF_frame = total_area_out_MF_frame/number_of_cells_out_MF_frame
     if number_of_cells_in_MF_frame == 0 or MF_mean_xpos == 0.0:
         average_number_of_sides_in_MF_frame = 0.0
         average_area_in_MF_frame = 0.0
@@ -945,7 +943,6 @@ def data_collection(i, tyssue):
             MF_shape_frame = 0.0
     script_data["average_number_of_sides_in_MF"]+=[average_number_of_sides_in_MF_frame]
     script_data["average_area_in_MF"]+=[average_area_in_MF_frame]
-    script_data["average_area_out_MF"]+=[average_area_out_MF_frame]
     script_data["MF_shape"]+=[MF_shape_frame]
     
 def chemo_mech_iterator(
@@ -1057,4 +1054,3 @@ script_data_stamp()
 
 # move back up for the sake of organization
 os.chdir("..")
-

@@ -224,7 +224,7 @@ def mitotic_number(dict_from_file):
     plt.savefig("mitotic_number_vs_time.png")
     plt.close()
     
-    return sum(mitotic_number_list)
+    return normalized_time_list,mitotic_number_list,sum(mitotic_number_list)
     
     
     

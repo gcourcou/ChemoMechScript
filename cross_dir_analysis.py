@@ -126,14 +126,18 @@ for item_x in x_data:
 dict_y_x_labels={
 'MF speed':[parameter_in_question,"$(μm h^{-1})$"],'MF linearity':[parameter_in_question,"$R^2$"],
 'final average area':[parameter_in_question,"($μm^2$)"],'final area':[parameter_in_question,"($μm^2$)"],'total_mitotic_number':[parameter_in_question, " "], 
+'average_anterior_cell_area':[parameter_in_question,"($μm^2$)"],'average_posterior_cell_area':[parameter_in_question,"($μm^2$)"],
 'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
 'area':["Time (h)","($μm^2$)"], 'anterior_area':["Time (h)","($μm^2$)"], 'posterior_area':["Time (h)","($μm^2$)"],
-'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"], 'area_ratio':["Time (h)","ratio(in/out)"],
-'average_posterior_area':["Time (h)", "($μm^2$)"], 'mitotic_frequency':["relative position to MF", "frequency"]
+'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"],
+'anterior_cell_area':["Time (h)","($μm^2$)"],'posterior_cell_area':["Time (h)","($μm^2$)"],
+    'cell number':["Time (h)","Cell Number"],
+'mitotic_number':["Normalized Time","Division Number"],
+'mitotic_frequency':["relative position to MF", "frequency"]
 }
 
 
-plot_keys=['MF speed','MF linearity','final average area','final area','total_mitotic_number']
+plot_keys=['MF speed','MF linearity','final average area','final area','average_anterior_cell_area','average_posterior_cell_area','total_mitotic_number']
 
 a={}
 for key in plot_keys:
@@ -147,12 +151,12 @@ for key in plot_keys:
     a[key]+=[temp][0]
 
 ## plot a time depnendent quanity for many regions in one plot
-plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area']
+plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area','anterior_cell_area','posterior_cell_area','cell number']
 
 # plot for a range that correspodns to average t_mechh
 # i use median
 
-plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF', 'MF_shape', 'area_ratio', 'average_posterior_area', 'mitotic_frequency']
+plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF', 'MF_shape', 'average_posterior_area', 'mitotic_frequency']
 
 # valid for plot_key_vectors Chi you need to add the rest for plot_key_MF and use them for nice plot
 #dict_y_x_labels={'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
@@ -249,8 +253,31 @@ for key in plot_keys:
     plt.savefig("cross_plot_"+str(key)+".png")
     plt.close()
 
-    
+plt.figure()
+max_y = []
+min_y = []
+
+key = "mitotic_number_list"
+time_key = "normalized_time_list"
+for item_x in x_data:
+    plt.plot(store[item_x][time_key],store[item_x][key],color=mag_colour_data[item_x])
+    max_y+=[np.max(store[item_x][key])]
+    min_y+=[np.min(store[item_x][key])]
+x_range_up=1.0
+x_range_down=0.0
+plt.xlim(x_range_down,x_range_up)
+y_range_up=np.max(max_y)
+y_range_down=np.min(min_y)
+plt.ylim(y_range_down,y_range_up)
+sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
+cbar=plt.colorbar(sm)
+cbar.set_label(parameter_in_question,fontsize=20)
+plt.title(str(key))
+# x y labbesl from dict
+plt.xlabel(dict_y_x_labels[key][0])
+plt.ylabel(dict_y_x_labels[key][1])
+plt.savefig("cross_plot_"+str(key)+".png")
+plt.close()
 #test = np.random.random((6, 5))
 #
 #heatmap(test,x_data,y_data)
-
