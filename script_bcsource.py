@@ -656,8 +656,8 @@ def mf_inf_cell(
 
 def visualization(i):
     animate_cells2(i, "y_concentration", "mech")
-    animate_cells2(i, "area", "mech")
-    animate_cells2(i, "num_sides", "mech")
+#    animate_cells2(i, "area", "mech")
+#    animate_cells2(i, "num_sides", "mech")
     animate_cells_MF(i, "y_concentration", "MF")
     plot_chem(i, "y_concentration", "MFvsx")
     plot_chem(i, "area", "areavsx")
