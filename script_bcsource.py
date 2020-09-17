@@ -848,8 +848,10 @@ def data_collection(i, tyssue):
             number_of_cell_in_P += 1
         elif row["population_variable"] == "A":
             A_area_sum += row["area"]
-    
-    script_data["average_posterior_area"] += [P_area_sum/number_of_cell_in_P]
+    if number_of_cell_in_P != 0:
+        script_data["average_posterior_area"] += [P_area_sum/number_of_cell_in_P]
+    else:
+        script_data["average_posterior_area"] += [0.0]
     # rep 6,7
     script_data["Posterior area"]+=[P_area_sum]
     script_data["Anterior area"]+=[A_area_sum]
