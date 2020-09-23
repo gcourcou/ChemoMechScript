@@ -156,7 +156,7 @@ plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area','anterior_c
 # plot for a range that correspodns to average t_mechh
 # i use median
 
-plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF', 'MF_shape', 'average_posterior_area', 'mitotic_frequency']
+plot_keys_MF=['average_number_of_sides_in_MF', 'average_area_in_MF', 'MF_shape', 'mitotic_frequency']
 
 # valid for plot_key_vectors Chi you need to add the rest for plot_key_MF and use them for nice plot
 #dict_y_x_labels={'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
