@@ -259,8 +259,8 @@ def analyze(bottom="./"):
         else:
                 anterior_cell_area+=[anterior_area[i]/an]
         if an != 0 and pn != 0:
-            posterior_area_average_sum+=posterior_cell_area
-            anterior_area_average_sum+=anterior_cell_area
+            posterior_area_average_sum+=posterior_area[i]/pn
+            anterior_area_average_sum+=anterior_area[i]/an
             non_zero_frame += 1
             
     out_dict['posterior_cell_area']=posterior_cell_area
