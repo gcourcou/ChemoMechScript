@@ -132,7 +132,7 @@ dict_y_x_labels={
 'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"],
 'anterior_cell_area':["Time (h)","($μm^2$)"],'posterior_cell_area':["Time (h)","($μm^2$)"],
     'cell number':["Time (h)","Cell Number"],
-'mitotic_number':["Normalized Time","Division Number"],
+'mitotic_number_list':["Normalized Time","Division Number"],
 'mitotic_frequency':["relative position to MF", "frequency"]
 }
 
