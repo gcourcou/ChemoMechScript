@@ -71,7 +71,7 @@ for directory in targets:
     if directory[-1]!="_":
         os.chdir(top_dir+directory)
         print(str(directory))
-        temp=analyze(bottom="0/")
+        temp=analyze(bottom="out_1/")
         # touple
         param=np.around(temp['parameters'][parameter_in_question],decimals=2)
         store[param]=temp

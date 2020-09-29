@@ -63,7 +63,7 @@ def  mitotic_frequency_sum(dict_from_file,division_type="uniform",interval=2) :
     plt.figure(figsize=(10,5),dpi=400)
     size=int((len(dict_from_file["mitotic position"])-skip_frame_start-skip_frame_end)/interval-1)
     print(size)
-    color_saturation_c=size*conversion_t_hr
+    color_saturation_c=((len(dict_from_file["mitotic position"])-skip_frame_start-skip_frame_end)/interval-1)*conversion_t_hr
     color_min_c=0
     out_frame = int(size/2)
     out_list = []
@@ -98,7 +98,7 @@ def  mitotic_frequency_sum(dict_from_file,division_type="uniform",interval=2) :
 #        print("cell number in strip is:")
 #        print(dict_from_file["cell_number_in_strip"][i])
         #plt.hist(mitotic_position_relative_to_MF, range=[-0.2,1.1],bins=23,alpha=0.45,fill=False,density=True)
-        color = plt.cm.jet((w*conversion_t_hr-color_min_c)/(color_saturation_c-color_min_c))
+        color = plt.cm.jet((w*interval*conversion_t_hr-color_min_c)/(color_saturation_c-color_min_c))
         x_interval = 1/number_of_slice
         xlist = []
         for i in range (0, number_of_slice):
@@ -210,9 +210,10 @@ def mitotic_number(dict_from_file):
     normalized_time_list = []
     mitotic_number_list = []
 
-    for i in range(0, total_frame):
+    for i in range(0, total_frame-1):
         normalized_time = i/total_frame
-        mitotic_number = len(dict_from_file["mitotic position"][i])
+        k = i + skip_frame_start + 1
+        mitotic_number = len(dict_from_file["mitotic position"][k])-1
         normalized_time_list.append(normalized_time)
         mitotic_number_list.append(mitotic_number)
     
