@@ -316,14 +316,14 @@ def analyze(bottom="./"):
         average_posterior_area_jump.append(out_dict['posterior_cell_area'][i+1]-out_dict['posterior_cell_area'][i])
         average_anterior_area_jump.append(out_dict['anterior_cell_area'][i+1]-out_dict['anterior_cell_area'][i])
     
-    
+    plot_time_array_jump = plot_time_array[0:plot_frame-1]
     yname="area_jump"
     plt.figure()
     plt.ylabel(yname+" ($μm^2$)")
     plt.xlabel("Time (h)")
-    total_area_label, = plt.plot(plot_time_array,total_area_jump,color = 'green',linestyle='.', label='total area')
-    posterior_area_label, =plt.plot(plot_time_array,posterior_area_jump,color = 'blue',linestyle='.', label='posterior area')
-    anterior_area_label, =plt.plot(plot_time_array,anterior_area_jump,color = 'red',linestyle='.', label='anterior area')
+    total_area_label, = plt.plot(plot_time_array_jump,total_area_jump,color = 'green',linestyle='.', label='total area')
+    posterior_area_label, =plt.plot(plot_time_array_jump,posterior_area_jump,color = 'blue',linestyle='.', label='posterior area')
+    anterior_area_label, =plt.plot(plot_time_array_jump,anterior_area_jump,color = 'red',linestyle='.', label='anterior area')
     plt.legend([total_area_label, posterior_area_label, anterior_area_label])
     plt.savefig(yname+"_vs_time.png")
     plt.close()
@@ -332,9 +332,9 @@ def analyze(bottom="./"):
     plt.figure()
     plt.ylabel(yname+" ($μm^2$)")
     plt.xlabel("Time (h)")
-    average_total_area_label, = plt.plot(plot_time_array,average_total_area_jump,color = 'green',linestyle='.', label='total area')
-    average_posterior_area_label, =plt.plot(plot_time_array,average_posterior_area_jump,color = 'blue',linestyle='.', label='posterior area')
-    average_anterior_area_label, =plt.plot(plot_time_array,average_anterior_area_jump,color = 'red',linestyle='.', label='anterior area')
+    average_total_area_label, = plt.plot(plot_time_array_jump,average_total_area_jump,color = 'green',linestyle='.', label='total area')
+    average_posterior_area_label, =plt.plot(plot_time_array_jump,average_posterior_area_jump,color = 'blue',linestyle='.', label='posterior area')
+    average_anterior_area_label, =plt.plot(plot_time_array_jump,average_anterior_area_jump,color = 'red',linestyle='.', label='anterior area')
     plt.legend([average_total_area_label, average_posterior_area_label, average_anterior_area_label])
     plt.savefig(yname+"_vs_time.png")
     plt.close()
