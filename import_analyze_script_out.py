@@ -16,6 +16,9 @@ from scipy.stats import chisquare
 from sklearn.metrics import r2_score
 from numpy import nan
 
+from mitotic_frequency import mitotic_frequency_sum
+from mitotic_frequency import shape_frequency
+from mitotic_frequency import mitotic_number
 #scipy.stats.chisquare(f_obs, f_exp=None, ddof=0, axis=0)
 #### Input parameters and define functions for estimations
 
@@ -88,48 +91,79 @@ def analyze(bottom="./"):
     conversion_t_hr=conversion_t*0.000277778
     #hr/t_mech
     time_array=np.arange(0,len(dict_from_file["tissue area"]))*conversion_t_hr
+    
+    
+    mitotic_frequency_list = mitotic_frequency_sum(dict_from_file,division_type="uniform", interval=3)
+    
+    shape_frequency(dict_from_file,division_type="uniform",interval=20)
+    
+    normalized_time_list,mitotic_number_list,total_mitotic_number = mitotic_number(dict_from_file, interval = 3)
+    
     plot_area_keys=["tissue area","Posterior area","Anterior area"]
     #names used for plots
     plot_area_names=["Total area","Posterior area","Anterior area"]
     plot_number_of_sides_in_MF=["average_number_of_sides_in_MF", "MF_shape"]
-    plot_area_in_MF=["average_area_in_MF"]
+    plot_area_MF=["average_area_in_MF"]
+
+    
+    skip_frame_start=0
+    # skip final frames
+    skip_frame_end=0
+    
+    for i in range(0,len(dict_from_file["mitotic position"])-1):
+        if dict_from_file["MF position"][i]==0.0 and dict_from_file["MF position"][i+1]!=0.0:
+            skip_frame_start=i
+    
+    for i in range(1,len(dict_from_file["mitotic position"])-1):
+        if dict_from_file["MF position"][-i]==0.0 and dict_from_file["MF position"][-i-1]!=0.0:
+            skip_frame_end=i
+            
+    total_frame = len(dict_from_file["mitotic position"])-skip_frame_start-skip_frame_end
+    plot_frame = len(dict_from_file["mitotic position"])-skip_frame_end
+    plot_time_array = []
+    for j in range(0, plot_frame):
+            plot_time_array.append(time_array[j])
+    
     for i in range(0,len(plot_area_keys)):
         key=plot_area_keys[i]
         yname=plot_area_names[i]
         plt.figure()
         plt.ylabel(yname+" ($μm^2$)")
         plt.xlabel("Time (h)")
+        plot_area_array = []
         area=np.array(dict_from_file[key])/((conversion_r)**2)
-        plt.plot(time_array,area,'.')
+        for j in range(0, plot_frame):
+            plot_area_array.append(area[j])
+        plt.plot(plot_time_array,plot_area_array,'.')
         plt.savefig(yname+"_vs_time.png")
         plt.close()
     for i in range(0,len(plot_number_of_sides_in_MF)):
         key=plot_number_of_sides_in_MF[i]
-        yname="average_number_of_sides_in_MF"
+        yname=key
         plt.figure()
-        plt.ylabel(yname+" ($μm^2$)")
+        plt.ylabel(yname)
         plt.xlabel("Time (h)")
         ylist = []
         time_array_1 = []
-        for i in range(0, len(time_array)):
-            if dict_from_file[key][i] != 0.0 and np.isnan(dict_from_file[key][i]) != True:
-                ylist += [dict_from_file[key][i]]
-                time_array_1 += [time_array[i]]
+        for j in range(0, len(time_array)):
+            if dict_from_file[key][j] != 0.0 and np.isnan(dict_from_file[key][j]) != True:
+                ylist += [dict_from_file[key][j]]
+                time_array_1 += [time_array[j]]
         plt.plot(time_array_1,ylist,'.')
         plt.savefig(yname+"_vs_time.png")
         plt.close()
-    for i in range(0,len(plot_area_in_MF)):
-        key=plot_area_in_MF[i]
-        yname="average_area_in_MF"
+    for i in range(0,len(plot_area_MF)):
+        key=plot_area_MF[i]
+        yname=key
         plt.figure()
         plt.ylabel(yname+" ($μm^2$)")
         plt.xlabel("Time (h)")
         area= []
         time_array_1 = []
-        for i in range(0, len(time_array)):
-            if dict_from_file[key][i] != 0.0 and np.isnan(dict_from_file[key][i]) != True:
-                area += [dict_from_file[key][i]/((conversion_r)**2)]
-                time_array_1 += [time_array[i]]
+        for j in range(0, len(time_array)):
+            if dict_from_file[key][j] != 0.0 and np.isnan(dict_from_file[key][j]) != True:
+                area += [dict_from_file[key][j]/((conversion_r)**2)]
+                time_array_1 += [time_array[j]]
         plt.plot(time_array_1,area,'.')
         plt.savefig(yname+"_vs_time.png")
         plt.close()
@@ -140,8 +174,11 @@ def analyze(bottom="./"):
     plt.figure()
     dict_from_file["cell number"]
     plt.ylabel("Cell number ")
-    plt.xlabel("Time (h)")   
-    plt.plot(time_array,dict_from_file["cell number"],'.')
+    plt.xlabel("Time (h)")
+    cell_number_array = []
+    for i in range(0, plot_frame):
+        cell_number_array.append(dict_from_file["cell number"][i])
+    plt.plot(plot_time_array,cell_number_array,'.')
     #plt.show()
     plt.savefig('cell_number_vs_time.png')
     plt.close()
@@ -151,7 +188,10 @@ def analyze(bottom="./"):
     plt.figure()
     plt.ylabel("Average cell area ($μm^2$)")
     plt.xlabel("Time (h)")
-    plt.plot(time_array,average_area,'.')
+    average_area_array = []
+    for i in range(0, plot_frame):
+        average_area_array.append(average_area[i])
+    plt.plot(plot_time_array,average_area_array,'.')
     plt.savefig('average_area_vs_time.png')
     plt.close()
 
@@ -187,7 +227,7 @@ def analyze(bottom="./"):
     
     plt.ylabel("Posterior Length (μm)")
     plt.xlabel("Time (h)")   
-    plt.plot(time_array,Lp,'.')
+    plt.plot(time_arrayf,Lpf,'.')
     #plt.show()
     plt.savefig('Lp_vs_time.png')
     plt.close()
@@ -195,7 +235,7 @@ def analyze(bottom="./"):
     plt.figure()
     plt.ylabel("Anterior Length (μm)")
     plt.xlabel("Time (h)")
-    plt.plot(time_array,La,'.')
+    plt.plot(time_arrayf,Laf,'.')
     #plt.show()                                                                                                                                                                          
     plt.savefig('La_vs_time.png')
     plt.close()
@@ -226,30 +266,79 @@ def analyze(bottom="./"):
 
     out_dict['final average area']=average_area[-1]
     out_dict['final area']  =area[-1]
-    out_dict['area']        =area
-    out_dict['posterior_area']=posterior_area
-    out_dict['anterior_area']=anterior_area
+    out_dict['area']        =area[0:plot_frame]
+    out_dict['posterior_area']=posterior_area[0:plot_frame]
+    out_dict['anterior_area']=anterior_area[0:plot_frame]
     
     posterior_cell_area=[]
     anterior_cell_area=[]
+    posterior_area_average_sum=0.0
+    anterior_area_average_sum=0.0
+    non_zero_frame = 0
     for i in range(0,len(posterior_area)):
-        cn=dict_from_file["Posterior cell number"][i]
-        if cn==0:
+        pn=dict_from_file["Posterior cell number"][i]
+        if pn==0:
                 posterior_cell_area+=[0]
         else:
-                posterior_cell_area+=[posterior_area[i]/cn]
-        cn=dict_from_file["Anterior cell number"][i]
-        if cn==0:
+                posterior_cell_area+=[posterior_area[i]/pn]
+                
+        an=dict_from_file["Anterior cell number"][i]
+        if an==0:
                 anterior_cell_area+=[0]
         else:
-                anterior_cell_area+=[anterior_area[i]/cn]
-    out_dict['posterior_cell_area']=posterior_cell_area
-    out_dict['anterior_cell_area']=anterior_cell_area
+                anterior_cell_area+=[anterior_area[i]/an]
+        if an != 0 and pn != 0:
+            posterior_area_average_sum+=posterior_area[i]/pn
+            anterior_area_average_sum+=anterior_area[i]/an
+            non_zero_frame += 1
+            
+    out_dict['posterior_cell_area']=posterior_cell_area[0:plot_frame]
+    out_dict['anterior_cell_area']=anterior_cell_area[0:plot_frame]
     # This average is not perfect
     # it includes zeroes, where proliferation ended, and simulation static result. 
     # perhaps we need to stop the simulation when MF reaches anterior to avoid this
-    out_dict['average_posterior_cell_area']=np.average(posterior_cell_area)
-    out_dict['average_anterior_cell_area']=np.average(anterior_cell_area)
+    average_posterior_cell_area = posterior_area_average_sum/non_zero_frame
+    average_anterior_cell_area = anterior_area_average_sum/non_zero_frame
+    out_dict['average_posterior_cell_area']=average_posterior_cell_area
+    out_dict['average_anterior_cell_area']=average_anterior_cell_area
+    
+    total_area_jump = []
+    posterior_area_jump = []
+    anterior_area_jump = []
+    average_total_area_jump = []
+    average_posterior_area_jump = []
+    average_anterior_area_jump = []
+    for i in range(0, plot_frame-1):
+        total_area_jump.append(out_dict['area'][i+1]-out_dict['area'][i])
+        posterior_area_jump.append(out_dict['posterior_area'][i+1]-out_dict['posterior_area'][i])
+        anterior_area_jump.append(out_dict['anterior_area'][i+1]-out_dict['anterior_area'][i])
+        average_total_area_jump.append(average_area_array[i+1]-average_area_array[i])
+        average_posterior_area_jump.append(out_dict['posterior_cell_area'][i+1]-out_dict['posterior_cell_area'][i])
+        average_anterior_area_jump.append(out_dict['anterior_cell_area'][i+1]-out_dict['anterior_cell_area'][i])
+    
+    
+    yname="area_jump"
+    plt.figure()
+    plt.ylabel(yname+" ($μm^2$)")
+    plt.xlabel("Time (h)")
+    total_area_label, = plt.plot(plot_time_array,total_area_jump,color = 'green',linestyle='.', label='total area')
+    posterior_area_label, =plt.plot(plot_time_array,posterior_area_jump,color = 'blue',linestyle='.', label='posterior area')
+    anterior_area_label, =plt.plot(plot_time_array,anterior_area_jump,color = 'red',linestyle='.', label='anterior area')
+    plt.legend([total_area_label, posterior_area_label, anterior_area_label])
+    plt.savefig(yname+"_vs_time.png")
+    plt.close()
+    
+    yname="cell_area_jump"
+    plt.figure()
+    plt.ylabel(yname+" ($μm^2$)")
+    plt.xlabel("Time (h)")
+    average_total_area_label, = plt.plot(plot_time_array,average_total_area_jump,color = 'green',linestyle='.', label='total area')
+    average_posterior_area_label, =plt.plot(plot_time_array,average_posterior_area_jump,color = 'blue',linestyle='.', label='posterior area')
+    average_anterior_area_label, =plt.plot(plot_time_array,average_anterior_area_jump,color = 'red',linestyle='.', label='anterior area')
+    plt.legend([average_total_area_label, average_posterior_area_label, average_anterior_area_label])
+    plt.savefig(yname+"_vs_time.png")
+    plt.close()
+
     
     ave_num_sides_MF = []
     for i in range (0, len(dict_from_file["average_number_of_sides_in_MF"])):
@@ -258,10 +347,13 @@ def analyze(bottom="./"):
     out_dict['average_number_of_sides_in_MF']=ave_num_sides_MF
 
     ave_area_MF = []
+
     for i in range(0, len(dict_from_file["average_area_in_MF"])):
         if dict_from_file["average_area_in_MF"][i] != 0.0 and np.isnan(dict_from_file["average_area_in_MF"][i]) != True:
             ave_area_MF += [ dict_from_file["average_area_in_MF"][i]/((conversion_r)**2) ]
+
     out_dict['average_area_in_MF'] = ave_area_MF
+
     
     MF_shape = []
     for i in range(0, len(dict_from_file["MF_shape"])):
@@ -272,12 +364,18 @@ def analyze(bottom="./"):
     out_dict['parameters']=parameters
     MF_last=dict_from_file['MF position'][-1]
     
-    out_dict['Lp']=Lp
-    out_dict['La']=La
-    out_dict["Posterior cell number"]=dict_from_file["Posterior cell number"]
-    out_dict["Anterior cell number"]=dict_from_file["Anterior cell number"]
-    out_dict["cell number"]=dict_from_file["cell number"]
-
+    out_dict['Lp']=Lpf
+    out_dict['La']=Laf
+    
+    out_dict["Posterior cell number"]=dict_from_file["Posterior cell number"][0:plot_frame]
+    out_dict["Anterior cell number"]=dict_from_file["Anterior cell number"][0:plot_frame]
+    out_dict["cell number"]=dict_from_file["cell number"][0:plot_frame]
+    
+    out_dict["mitotic_frequency"] = mitotic_frequency_list
+    out_dict["normalized_time_list"] = normalized_time_list
+    out_dict["mitotic_number_list"] = mitotic_number_list
+    out_dict["total_mitotic_number"] = total_mitotic_number
+    
     if MF_last==0.0:
         out_dict['finished']=True
     else:

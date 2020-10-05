@@ -3,7 +3,7 @@ import os
 import sys
 dir_N=int(input('please enter number of dirs' ))
 
-parameter_range=[3*i for i in range(0,dir_N)]
+parameter_range=[0.4+0.1*i for i in range(0,dir_N)]
 for item in parameter_range :
     try : 
         os.mkdir(str(item)) 
@@ -28,6 +28,11 @@ os.system("for d in */; do cp realistic_tissue.hf5 \"$d\"; done")
 mod_str=str(input('please enter name of target parameter (eg y_dif)' ))
 for root, dirs, files in os.walk(".", topdown=True):
     print(dirs)
+    for i in range(0, len(dirs)):
+        if dirs[i] == ".git":
+            del dirs[i]
+            break
+    print(dirs)
     for name in dirs:
         os.chdir(os.path.join(root, name))
         cwd=os.getcwd()
@@ -42,7 +47,7 @@ for root, dirs, files in os.walk(".", topdown=True):
             s=" "
             #mod_str=str(input('please enter name of target parameter (eg y_dif)' ))
             if values[0]==mod_str:
-                values[1]=str(float(values[1])*(magnitude/10.))
+                values[1]=str(magnitude)
                 theline=s.join(values)
                 out.write(theline+"  \n")
                 #print(theline)

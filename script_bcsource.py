@@ -3,8 +3,8 @@
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
 #sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
-sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
-#sys.path.insert(0,"/scratch/chixu/tools/tyssue")
+#sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
+sys.path.insert(0,"/scratch/chixu/tools/tyssue")
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -931,7 +931,7 @@ def data_collection(i, tyssue):
             total_number_of_sides_in_MF_frame += row["num_sides"]
             total_area_in_MF_frame += row["area"]
             total_MF_dev += (MF_mean_xpos-row["x"])*(MF_mean_xpos-row["x"])
-    if number_of_cells_in_MF_frame == 0:
+    if number_of_cells_in_MF_frame == 0 or MF_mean_xpos == 0.0:
         average_number_of_sides_in_MF_frame = 0.0
         average_area_in_MF_frame = 0.0
         MF_shape_frame = 0.0
@@ -1054,4 +1054,3 @@ script_data_stamp()
 
 # move back up for the sake of organization
 os.chdir("..")
-
