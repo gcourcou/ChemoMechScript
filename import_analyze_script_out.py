@@ -95,7 +95,7 @@ def analyze(bottom="./"):
     
     mitotic_frequency_list = mitotic_frequency_sum(dict_from_file,division_type="uniform", interval=20)
     
-    shape_frequency(dict_from_file,division_type="uniform",interval=20)
+#    shape_frequency(dict_from_file,division_type="uniform",interval=20)
     
     normalized_time_list,mitotic_number_list,total_mitotic_number = mitotic_number(dict_from_file, interval = 3)
     
