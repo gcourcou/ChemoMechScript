@@ -93,7 +93,7 @@ def analyze(bottom="./"):
     time_array=np.arange(0,len(dict_from_file["tissue area"]))*conversion_t_hr
     
     
-    mitotic_frequency_list = mitotic_frequency_sum(dict_from_file,division_type="uniform", interval=3)
+    mitotic_frequency_list = mitotic_frequency_sum(dict_from_file,division_type="uniform", interval=20)
     
     shape_frequency(dict_from_file,division_type="uniform",interval=20)
     
