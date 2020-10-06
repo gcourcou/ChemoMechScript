@@ -363,7 +363,7 @@ if first_realization==True:
     # Initialize params for aegerter growth
     sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
     if parameters["random_init_cycle"]=="Yes":
-        sheet.face_df[ "time_for_growth"]=np.random.random( sheet.face_df.shape[0] )
+        sheet.face_df[ "time_for_growth"]=0.5+np.random.random( sheet.face_df.shape[0] )/2
     elif parameters["random_init_cycle"]=="No":
         sheet.face_df[ "time_for_growth"]=parameters["cycle_magnitude"]+np.zeros( sheet.face_df.shape[0] )
 else:
