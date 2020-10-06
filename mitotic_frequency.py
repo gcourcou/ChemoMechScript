@@ -63,7 +63,7 @@ def  mitotic_frequency_sum(dict_from_file,division_type="uniform",interval=3) :
     plt.figure(figsize=(10,5),dpi=400)
     size=int((len(dict_from_file["mitotic position"])-skip_frame_start-skip_frame_end)/interval-1)
     print(size)
-    color_saturation_c=((len(dict_from_file["mitotic position"])-skip_frame_start-skip_frame_end)/interval-1)*conversion_t_hr
+    color_saturation_c=(len(dict_from_file["mitotic position"])-skip_frame_start-skip_frame_end)*conversion_t_hr
     color_min_c=0
     out_frame = int(size/2)
     out_list = []
@@ -218,10 +218,8 @@ def mitotic_number(dict_from_file, interval = 3):
         mitotic_number = len(dict_from_file["mitotic position"][k])-1
         normalized_time_list_total.append(normalized_time)
         mitotic_number_list_total.append(mitotic_number)
-    l = int(len(normalized_time_list)/interval)-1
-    for j in range(0, l):
-        mitotic_number_list.append(mitotic_number_list_total[j*interval])
-        normalized_time_list.append(normalized_time_list_total[j*interval])
+    mitotic_number_list = mitotic_number_list_total[::interval]
+    normalized_time_list = normalized_time_list_total[::interval]
     plt.figure()
     plt.plot(normalized_time_list, mitotic_number_list)
     plt.title("mitotic_number")
