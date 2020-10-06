@@ -220,6 +220,10 @@ def mitotic_number(dict_from_file, interval = 3):
         mitotic_number_list_total.append(mitotic_number)
     mitotic_number_list = mitotic_number_list_total[::interval]
     normalized_time_list = normalized_time_list_total[::interval]
+    print("mitotic number list length is:")
+    print(len(mitotic_number_list))
+    print("normalized time list length is:")
+    print(len(normalized_time_list))
     plt.figure()
     plt.plot(normalized_time_list, mitotic_number_list)
     plt.title("mitotic_number")
