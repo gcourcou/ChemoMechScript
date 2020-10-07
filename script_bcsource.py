@@ -62,7 +62,7 @@ script_data = {}
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
                   "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape",
-                  "Posterior cell number", "Anterior cell number","growth_rate_alpha"]
+                  "Posterior cell number", "Anterior cell number","growth_rate_alpha","cell_death","cell_division"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -290,6 +290,13 @@ fig, ax = sheet_view(sheet, coords, **draw_specs)
 fig.set_size_inches(7, 6)
 # plt.show()
 ## end view
+#plt.rcParams['figure.figsize'] = (7,6)
+font = {'family' : 'normal',
+        'size'   : 20}
+plt.rc('font', **font)
+calc=2760/5
+plt.rcParams['figure.dpi']=calc
+plt.rcParams['savefig.bbox']='tight'
 
 proteins = {"0": "y_concentration"}
 
@@ -491,7 +498,7 @@ def cell(t, y):
     return fun
 
 
-def animate_cells2(timer, chem_name, string):
+def animate_cells2(timer, chem_name, string, plot_time):
     # String tells us how to name file after image
     plt.clf()
     # sheet.face_df['col'] = np.array([ sol.y[i][-1] for i in range(0,sheet.face_df.shape[0]) ])
@@ -508,7 +515,13 @@ def animate_cells2(timer, chem_name, string):
     # fig, ax= sheet_view(sheet, coords, **draw_specs)
     fig, ax1, ax2 = sheet_view_GC_colorbar(sheet, coords, **draw_specs)
     fig.set_size_inches(6, 6)
-    fig.suptitle(chem_name + " frame " + str(timer*conversion_t_hr*t_plot), fontsize=14)
+    # change of name
+    if chem_name=="y_concentration":
+        plot_title="Hh concentration"
+    else:
+        plot_title=chem_name
+    plot_time=np.around(timer*conversion_t_hr*t_plot,decimals=2)
+    fig.suptitle(plot_title + " at " + str(timer*conversion_t_hr*t_plot) + " hours", fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
     # plt.axis('off')
@@ -516,7 +529,7 @@ def animate_cells2(timer, chem_name, string):
     plt.close()
 
 
-def animate_cells_MF(timer, chem_name, string):
+def animate_cells_MF(timer, chem_name, string, plot_time):
     # String tells us how to name file after image
     plt.clf()
     sheet.face_df["col"] = np.array(
@@ -538,7 +551,8 @@ def animate_cells_MF(timer, chem_name, string):
     # fig, ax= sheet_view(sheet, coords, **draw_specs)
     fig, ax1, ax2 = sheet_view_GC_colorbar(sheet, coords, **draw_specs)
     fig.set_size_inches(6, 6)
-    fig.suptitle("MF " + str(timer), fontsize=14)
+    #plot_time=np.around(timer*conversion_t_hr*t_plot,decimals=2)
+    fig.suptitle("MF position at " + str(plot_time) +" hours", fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
     # plt.axis('off')
@@ -546,7 +560,7 @@ def animate_cells_MF(timer, chem_name, string):
     plt.close()
 
 
-def animate_cells_stateS(timer, string):
+def animate_cells_stateS(timer, string, plot_time):
     plt.clf()
     x_ref = []
     for index, row in sheet.face_df.iterrows():
@@ -566,7 +580,7 @@ def animate_cells_stateS(timer, string):
     plt.close()
 
 
-def plot_chem(timer, chem_name, string):
+def plot_chem(timer, chem_name, string, plot_time):
     # String tells us how to name file after image
     plt.clf()
     x_y_array = np.array(
@@ -577,6 +591,7 @@ def plot_chem(timer, chem_name, string):
     )
     plt.plot([i[0] for i in x_y_array], [i[2] for i in x_y_array], "bx", alpha=0.25)
     x_y_ref = []
+    # val is centering
     val = (sheet.face_df["y"].max() + sheet.face_df["y"].min()) / 2.0
     for item in x_y_array:
         if val - 1.0 < item[1] < val + 1.0:
@@ -598,7 +613,8 @@ def plot_chem(timer, chem_name, string):
 
     plt.plot(bin_x, average_chem, "rx") 
     
-    plt.title(chem_name + " vs A-P position " + str(timer) + "centered " + str(val))
+    #plt.title(chem_name + " vs A-P position " + str(timer) + "centered " + str(val))
+    plt.title(chem_name + " vs A-P position"+ " at " + plot_time + " hours")
     if chem_name=="area":
         plt.ylim(0.0,0.8)
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png")
@@ -607,7 +623,7 @@ def plot_chem(timer, chem_name, string):
     plt.close()
 
 
-def plot_topology(timer, sheet):
+def plot_topology(timer, sheet, plot_time):
     #
     # 1. frequency of number of sides
     #sheet.face_df.shape[0]
@@ -621,7 +637,7 @@ def plot_topology(timer, sheet):
     plt.ylabel("Pn")
     plt.xlabel("number of sides")
     # plt.axis([0,40,0,0.8])
-    plt.title("cell percentages of different number of sides")
+    plt.title("cell percentages of different number of sides"+ " at " + plot_time + " hours")
     plt.savefig("image" + "cellnumber_topology" + "{0:0=2d}".format(timer) + ".png")
     # plt.show()
     plt.close()
@@ -643,7 +659,7 @@ def plot_topology(timer, sheet):
     plt.ylabel("<An>/<A>")
     plt.xlabel("number of sides")
     # plt.axis([0,40,0,0.8])
-    plt.title("relative area of the cell versus number of sides")
+    plt.title("Cell relative area versus number of sides" + " at " + plot_time + " hours")
     plt.savefig("image" + "cellarea_topology" + "{0:0=2d}".format(timer) + ".png")
     # plt.show()
     plt.close()
@@ -682,14 +698,15 @@ def mf_inf_cell(
 
 
 def visualization(i):
-    animate_cells2(i, "y_concentration", "mech")
+    plot_time=str(np.around(i*conversion_t_hr*t_plot,decimals=2))
+    animate_cells2(i, "y_concentration", "mech",plot_time)
 #    animate_cells2(i, "area", "mech")
 #    animate_cells2(i, "num_sides", "mech")
-    animate_cells_MF(i, "y_concentration", "MF")
-    plot_chem(i, "y_concentration", "MFvsx")
-    plot_chem(i, "area", "areavsx")
+    animate_cells_MF(i, "y_concentration", "MF",plot_time)
+    plot_chem(i, "y_concentration", "MFvsx",plot_time)
+    plot_chem(i, "area", "areavsx",plot_time)
     #animate_cells_stateS(i, "Sfreqvsx")
-    plot_topology(i, sheet)
+    plot_topology(i, sheet,plot_time)
 
 
 def mechanical_reaction(tyssue):
@@ -751,20 +768,27 @@ def cell_grow_and_divide(tyssue):
         PL=script_data["L"][-1][0]-script_data["MF position"][-1]
         #PL=store_tissue_length[-1][0]-store_MF_position[-1]
         # rep 11
+    cells_before_div=len(sheet.face_df)
+
     mitotic_shape, mitotic_position = cell_GS(sheet,1.,0.04,0.5,f_alpha(PL),long_axis_div=False)
+
+    cells_after_div=len(sheet.face_df)
+    new_cells=cells_after_div-cells_before_div
+
+    script_data["cell_division"]+=[new_cells]
     # store division position relative to MF
     # rep 10 this can be done since cell_GS is executed every t_mech anyway!
     script_data["mitotic position"]+=[mitotic_position]
-    #store_mitotic_position+=[mitotic_position]
     #
     tri_faces = sheet.face_df[sheet.face_df["num_sides"] < 4].index
-
+    script_data["cell_death"]+=[len(tri_faces)]
+    #print(len(tri_faces))
     cells = sheet.face_df.shape[0]
-
+    
     while len(tri_faces):
-
+    
         remove_face(sheet, tri_faces[0])
-
+    
         tri_faces = sheet.face_df[sheet.face_df["num_sides"] < 4].index
     sheet.get_opposite()
     for index, row in sheet.edge_df.iterrows():
@@ -1019,10 +1043,15 @@ def chemo_mech_iterator(
         
         
         data_collection(i, sheet)
-        #                store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa,  store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length, store_P_area, store_A_area)
         cell_grow_and_divide(sheet)
+        # before energy min is called we want to count our cells
+        cells_before_min=len(sheet.face_df)
         solver.find_energy_min(sheet, geom, model)
-
+        # after energy min is called we want to count our cells 
+        cells_after_min=len(sheet.face_df)
+        dead_cells=cells_before_min-cells_after_min
+        # dead cells first added in list in cell_grow_and_divide 
+        script_data["cell_death"][-1]+=dead_cells
         # print(sheet.face_df['time_for_M'])
         # print(sheet.face_df['prefered_area'])
         initial_concentration = []
