@@ -62,7 +62,7 @@ script_data = {}
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
                   "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape",
-                  "Posterior cell number", "Anterior cell number"]
+                  "Posterior cell number", "Anterior cell number","growth_rate_alpha"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -149,12 +149,22 @@ if proliferation_type=="area":
             # 2*0.015 since we need half volume to divide
             value=k0*np.exp(-1*delta*PL*(1/conversion_r))/(2*0.015*(1/conversion_t))
             print(value)
+            script_data["growth_rate_alpha"]+=[value]
             return value
     elif proliferation_time_dependent=="no":
         def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
             value=parameters["proliferation_magnitude"]*( parameters["t_mech"]/og_t_mech  )
             print(value)
-            return value        
+            script_data["growth_rate_alpha"]+=[value]
+            return value
+    elif proliferation_time_dependent=="area":
+        def f_alpha(PL,k0=7.67*(10**(-5)), conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            conversion_t=conversion_t*parameters["conversion_t_magnitude"]
+            conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
+            value=( k0/(2*0.015*(1/conversion_t)) ) * ( script_data["cell number"][0]/script_data["cell number"][-1] ) 
+            print(value)
+            script_data["growth_rate_alpha"]+=[value]
+            return value
 elif proliferation_type=="uniform":
     from division_functions_aegerter import cell_Aegerter_uni  as cell_GS
     if proliferation_time_dependent=="exponential":
