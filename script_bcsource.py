@@ -165,6 +165,23 @@ if proliferation_type=="area":
             print(value)
             script_data["growth_rate_alpha"]+=[value]
             return value
+    elif proliferation_time_dependent=="preset_exponential":
+        def f_alpha(PL,k0=4*(10**(-5)),delta=0.0107 ,conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
+            conversion_t=conversion_t*parameters["conversion_t_magnitude"]
+            conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
+            # artificial PL=Vmf*t
+            if script_data["MF position"][-1]==0:
+                PL_artificial=0.0
+            else:
+                PL_artificial=3.4*len(script_data["cell number"])*(conversion_t/(60**2))
+            print(k0)
+            print(PL_artificial)
+            print(conversion_t/(60**2))
+            print(np.exp(-1*delta*PL_artificial))
+            value=k0*np.exp(-1*delta*PL_artificial)/(2*0.015*(1/conversion_t))
+            print("alpha is " + str(value) )
+            script_data["growth_rate_alpha"]+=[value]
+            return value
 elif proliferation_type=="uniform":
     from division_functions_aegerter import cell_Aegerter_uni  as cell_GS
     if proliferation_time_dependent=="exponential":
