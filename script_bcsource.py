@@ -3,7 +3,7 @@
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
 #sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
-#sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
+sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
 sys.path.insert(0,"/scratch/chixu/tools/tyssue")
 
 import warnings
@@ -617,6 +617,8 @@ def plot_chem(timer, chem_name, string, plot_time):
     plt.title(chem_name + " vs A-P position"+ " at " + plot_time + " hours")
     if chem_name=="area":
         plt.ylim(0.0,0.8)
+        plt.ylabel("Area ($pixels^2$)")
+    plt.xlabel("Position (pixels)")
     plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png")
     # plt.axis('off')
     # plt.show()
