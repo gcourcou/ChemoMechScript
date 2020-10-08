@@ -161,7 +161,7 @@ if proliferation_type=="area":
         def f_alpha(PL,k0=7.67*(10**(-5)), conversion_r=0.23232956642491454,conversion_t=915.3565322296259):
             conversion_t=conversion_t*parameters["conversion_t_magnitude"]
             conversion_t=conversion_t*( parameters["t_mech"]/og_t_mech  )
-            value=( k0/(2*0.015*(1/conversion_t)) ) * ( script_data["cell number"][0]/script_data["cell number"][-1] ) 
+            value=( k0/(2*0.015*(1/conversion_t)) ) * ( script_data["tissue area"][0]/script_data["tissue area"][-1] ) 
             print(value)
             script_data["growth_rate_alpha"]+=[value]
             return value
