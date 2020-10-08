@@ -3,7 +3,7 @@ import os
 import sys
 dir_N=int(input('please enter number of dirs' ))
 
-parameter_range=[0.4+0.1*i for i in range(0,dir_N)]
+parameter_range=[1+i for i in range(0,dir_N)]
 for item in parameter_range :
     try : 
         os.mkdir(str(item)) 
