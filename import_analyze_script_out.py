@@ -263,7 +263,7 @@ def analyze(bottom="./"):
     anterior_area=np.array(dict_from_file["Anterior area"])/((conversion_r)**2)
     posterior_area=np.array(dict_from_file["Posterior area"])/((conversion_r)**2)
 
-
+    out_dict['final cell number']=dict_from_file["cell number"][-1]
     out_dict['final average area']=average_area[-1]
     out_dict['final area']  =area[-1]
     out_dict['area']        =area[0:plot_frame]
@@ -370,6 +370,8 @@ def analyze(bottom="./"):
     out_dict["Posterior cell number"]=dict_from_file["Posterior cell number"][0:plot_frame]
     out_dict["Anterior cell number"]=dict_from_file["Anterior cell number"][0:plot_frame]
     out_dict["cell number"]=dict_from_file["cell number"][0:plot_frame]
+    out_dict["cell_death"]=dict_from_file["cell_death"][0:plot_frame]
+    out_dict["cell_division"]=dict_from_file["cell_division"][0:plot_frame]
     
     out_dict["mitotic_frequency"] = mitotic_frequency_list
     out_dict["normalized_time_list"] = normalized_time_list

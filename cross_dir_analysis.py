@@ -66,12 +66,12 @@ for root, dirs, files in os.walk(".", topdown=False):
 print("targets:")
 print(targets)
 store={}
-parameter_in_question="MF_contract"
+parameter_in_question="Repeats"
 for directory in targets:
     if directory[-1]!="_":
         os.chdir(top_dir+directory)
         print(str(directory))
-        temp=analyze(bottom="out_1/")
+        temp=analyze(bottom="out_3/")
         # touple
         param=np.around(temp['parameters'][parameter_in_question],decimals=2)
         store[param]=temp
@@ -102,7 +102,7 @@ os.chdir(top_dir)
 
 # zero was not valid
 #x_data = np.arange(.1,.9,.1)
-x_data=[.4 + 0.1*(i) for i in range(0,7)]  
+x_data=[1 + 1*(i) for i in range(0,10)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
@@ -131,13 +131,13 @@ dict_y_x_labels={
 'area':["Time (h)","($μm^2$)"], 'anterior_area':["Time (h)","($μm^2$)"], 'posterior_area':["Time (h)","($μm^2$)"],
 'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"],
 'anterior_cell_area':["Time (h)","($μm^2$)"],'posterior_cell_area':["Time (h)","($μm^2$)"],
-    'cell number':["Time (h)","Cell Number"],
+    'cell number':["Time (h)","Cell Number"],'cell_death':["Time (h)","Apoptotic Cell Number"],'cell_division':["Time (h)","Mitotic Cell Number"],
 'mitotic_number_list':["Normalized Time","Division Number"],
-'mitotic_frequency':["relative position to MF", "frequency"]
+'mitotic_frequency':["relative position to MF", "frequency"], 'final cell number':[parameter_in_question,"Cell Number"]
 }
 
 
-plot_keys=['MF speed','MF linearity','final average area','final area','average_anterior_cell_area','average_posterior_cell_area','total_mitotic_number']
+plot_keys=['MF speed','MF linearity','final average area','final area','average_anterior_cell_area','average_posterior_cell_area','total_mitotic_number','final cell number']
 
 a={}
 for key in plot_keys:
@@ -151,7 +151,8 @@ for key in plot_keys:
     a[key]+=[temp][0]
 
 ## plot a time depnendent quanity for many regions in one plot
-plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area','anterior_cell_area','posterior_cell_area','cell number']
+plot_keys_vectors=['Lp','La','area','anterior_area','posterior_area','anterior_cell_area','posterior_cell_area','cell number','cell_division',
+                   'cell_death']
 
 # plot for a range that correspodns to average t_mechh
 # i use median
@@ -243,6 +244,9 @@ for key in plot_keys:
     plt.figure()
     print(x_data)
     print(a[key])
+    print(key)
+    print("average" + str(np.average(a[key])) )
+    print("variance" + str(np.var(a[key]) ) )
     for item_x in x_data:
         plt.scatter(item_x,store[item_x][key],color=colour_data[item_x])
     #plt.plot(x_data,a[key],'.')
