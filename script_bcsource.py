@@ -1074,10 +1074,16 @@ def proliferation(sheet,**kwargs):
     for i in range(0,steps):
         mechanical_reaction(sheet)
         # moved data_collection up since i use info from data for cell growthh
+        
         data_collection(i, sheet)
-        #               store_cell_number, store_cell_number_in_strip, store_cell_number_in_strip_pa, store_cell_shape_in_strip_pa, store_tissue_area, store_MF_position, store_mech_timer, store_tissue_length,store_P_area, store_A_area)
+        
         cell_grow_and_divide(sheet)
+        cells_before_min=len(sheet.face_df)
         solver.find_energy_min(sheet, geom, model)
+        cells_after_min=len(sheet.face_df)
+        dead_cells=cells_before_min-cells_after_min
+        # dead cells first added in list in cell_grow_and_divide 
+        script_data["cell_death"][-1]+=dead_cells
         if kwargs["plot"] == True and i%t_plot==0:
             visualization( int(i/t_plot) )
         # data collection moved before cell_grow since i use the store arrays for my growth rate  
