@@ -11,7 +11,7 @@ boundary_flux			0.4
 t_mech 				0.04  
 t_f				2000
 t_proliferation			0    
-t_plot				5
+t_plot				50
 y_dif				1
 y_dec				0.5
 h_auto				0.25
