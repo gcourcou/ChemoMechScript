@@ -294,6 +294,21 @@ def analyze(bottom="./"):
             
     out_dict['posterior_cell_area']=posterior_cell_area[0:plot_frame]
     out_dict['anterior_cell_area']=anterior_cell_area[0:plot_frame]
+    
+    plt.figure()
+    plt.ylabel("Average posterior cell area ($μm^2$)")
+    plt.xlabel("Time (h)")
+    plt.plot(plot_time_array,posterior_cell_area[0:plot_frame],'.')
+    plt.savefig('average_posterior_area_vs_time.png')
+    plt.close()
+
+    plt.figure()
+    plt.ylabel("Average anterior cell area ($μm^2$)")
+    plt.xlabel("Time (h)")
+    plt.plot(plot_time_array,anterior_cell_area[0:plot_frame],'.')
+    plt.savefig('average_anterior_area_vs_time.png')
+    plt.close()
+    
     # This average is not perfect
     # it includes zeroes, where proliferation ended, and simulation static result. 
     # perhaps we need to stop the simulation when MF reaches anterior to avoid this
