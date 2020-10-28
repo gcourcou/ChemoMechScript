@@ -772,7 +772,7 @@ def cell_grow_and_divide(tyssue):
         # rep 11
     cells_before_div=len(sheet.face_df)
 
-    mitotic_shape, mitotic_position = cell_GS(sheet,1.,0.04,0.5,f_alpha(PL),long_axis_div=False)
+    mitotic_shape, mitotic_position = cell_GS(sheet,1.,parameters["mechanosensing_magnitude"],0.5,f_alpha(PL),long_axis_div=False)
 
     cells_after_div=len(sheet.face_df)
     new_cells=cells_after_div-cells_before_div
