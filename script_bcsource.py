@@ -309,7 +309,7 @@ MF_contract = parameters["MF_contract"]
 MF_relax = parameters["MF_relax"]
 MF_init_c = parameters["MF_init_c"]
 
-
+iterations_to_inactivation=int(parameters["hours_to_inactivation"]/conversion_t_hr)
 # define boundary source terms carefully since tissue moves
 if first_realization==True: 
     # Initialize morphogens in dataframe
@@ -390,12 +390,14 @@ if first_realization==True:
     
     # loading file causes error so equal is better
     #sheet.face_df.insert(1, "population_variable", "P")
-    sheet.face_df["population_variable"]=["P" for i in range(0,sheet.face_df.shape[0])]
-    sheet.face_df.insert(1, "time_in_growth", 0)
+    sheet.face_df["population_variable"]=["A" for i in range(0,sheet.face_df.shape[0])]
+    sheet.face_df.insert(1, "iterations_in_posterior", 0)
     #sheet.face_df.insert(1, "time_for_growth", 0)
     
     # Initialize params for aegerter growth
     sheet.face_df['uniform_growth_parameter'] = 0.25+1.5*np.random.random( sheet.face_df.shape[0])
+    # Initialize params for inactivate posterior
+    sheet.face_df.insert(1, "time_in_growth", 0)
     if parameters["random_init_cycle"]=="Yes":
         sheet.face_df[ "time_for_growth"]=0.5+np.random.random( sheet.face_df.shape[0] )/2
     elif parameters["random_init_cycle"]=="No":
@@ -678,13 +680,19 @@ def mf_inf_cell(
     # initialize the hh density for all cells, since we do not have the density in real situation
     # this line just changes the hh_density for the forth cell, and will be changed after we get the density in real situation
     for index, row in sheet.face_df.iterrows():
+        if row[string] < lower_limit:
+            #sheet.face_df.at[index, "population_variable"] = "A"
+            pass
         if lower_limit < row[string] < upper_limit:
             sheet.face_df.at[index, "prefered_area"] = hh_inf_area
             sheet.face_df.at[index, "cell_cycle"] = "P"
+            sheet.face_df.at[index, "population_variable"] = "MF"
         elif row[string] >= upper_limit:
             # restore area value if mf has passed
             sheet.face_df.at[index, "prefered_area"] = relax_area
             sheet.face_df.at[index, "cell_cycle"] = "P"
+            sheet.face_df.at[index, "population_variable"] = "P"
+            sheet.face_df.at[index, "iterations_in_posterior"]=row["iterations_in_posterior"]+1
     # For a certain cell, if the hh_density is between the restriction we set, the area of the cell will change to hh_inf_area
     # Find energy minimum
 
@@ -698,6 +706,17 @@ def mf_inf_cell(
     print("Successfull gradient descent? ", res["success"])
     sheet.sanitize()
 
+def inactivate_posterior(iterations_to_inactivation):
+#    for index, row in sheet.face_df.iterrows():
+#        if row["iterations_in_posterior"]==30 :
+#            verts = sheet.edge_df.loc[sheet.edge_df['face'] == index, 'srce'].to_numpy()
+#            sheet.vert_df.loc[verts, 'is_active'] = 0
+    
+    # 30 is arbitrary but it correspodns to two hours 30*conversion_t_hr=2.0hrs of OG
+    inactivation_indexes=sheet.face_df.index[sheet.face_df["iterations_in_posterior"] == iterations_to_inactivation].tolist()
+    for item in inactivation_indexes:
+        verts = sheet.edge_df.loc[sheet.edge_df['face'] == index, 'srce'].to_numpy()
+        sheet.vert_df.loc[verts, 'is_active'] = 0
 
 def visualization(i):
     plot_time=str(np.around(i*conversion_t_hr*t_plot,decimals=2))
@@ -742,16 +761,16 @@ def mechanical_reaction(tyssue):
 #    ]
 # end commented block from local_edge_df
     # auto_prod_mag[1]=[0.0 for i in range(0,sheet.face_df.shape[0])]
-    for index, row in sheet.face_df.iterrows():
-        # auto_prod_mag[1][index]=1000
-        if row["y_concentration"] < MF_low:
-            sheet.face_df.at[index, "population_variable"] = "A"
-        elif MF_low < row["y_concentration"] < MF_high:
-            sheet.face_df.at[index, "population_variable"] = "MF"
-            # set source on
-            # auto_prod_mag[1][index]=z_auto
-        else:
-            sheet.face_df.at[index, "population_variable"] = "P"
+#    for index, row in sheet.face_df.iterrows():
+#        # auto_prod_mag[1][index]=1000
+#        if row["y_concentration"] < MF_low:
+#            sheet.face_df.at[index, "population_variable"] = "A"
+#        elif MF_low < row["y_concentration"] < MF_high:
+#            sheet.face_df.at[index, "population_variable"] = "MF"
+#            # set source on
+#            # auto_prod_mag[1][index]=z_auto
+#        else:
+#            sheet.face_df.at[index, "population_variable"] = "P"
     # z_auto
 
 #store_mitotic_position_temp=[]
@@ -803,35 +822,10 @@ def cell_grow_and_divide(tyssue):
             sheet.face_df.at[face_id, "on_boundary"] = False
 
 
-#store_cell_number = []
-#store_tissue_area=[]
-#store_MF_position = []
-#store_mech_timer = []
-## in cell grow and divide
-#store_mitotic_position = []
-#store_tissue_length = []
-#store_P_area = []
-#store_A_area = []
-#
-##mitotic frequency related parameters
-#store_cell_number_in_strip = []
-#store_cell_number_in_strip_pa = []
-#store_cell_shape_in_strip_pa = []
 
 def data_collection(i, tyssue):
-#                    cell_number, cell_number_in_strip, cell_number_in_strip_pa, cell_shape_in_strip_pa, tissue_area, MF_position, mech_timer, tissue_length,P_area, A_area):
-    
-    # rep 1
     script_data["cell number"]+=[tyssue.face_df.shape[0]]
-    #cell_number += [tyssue.face_df.shape[0]]
-    # rep 1
-    
-    # rep 2
     script_data["tissue area"]+=[tyssue.face_df['area'].sum()]
-    #tissue_area +=[tyssue.face_df['area'].sum()]
-    # rep2
-#    s_arr=np.array([ int(row['cell_cycle']=='S')*1.  for index, row in tyssue.face_df.iterrows() ])
-#    mitosis_index +=[np.sum(s_arr) /tyssue.face_df.shape[0] ]
     x_y_array = np.array(
         [
             [row["x"], row["y"], row["population_variable"] == "MF"]
@@ -853,29 +847,10 @@ def data_collection(i, tyssue):
         script_data["MF position"]+=[MF_mean_xpos]
         MF_position_now = MF_mean_xpos
         
-#    MF_mean_xpos = np.mean(x_y_ref)
-#    if np.isnan(MF_mean_xpos):
-#        #rep 3
-#        #MF_position += [0.0]
-#        script_data["MF position"]+=[0.0]
-#        #rep 3
-#        
-#        MF_position_now = 0.0
-#    else:
-#        # MF position is defined as the x position of the MF cells at the midpoint of the eye disc
-#        #rep 3
-#        script_data["MF position"]+=[MF_mean_xpos]
-#        #MF_position += [MF_mean_xpos]
-#        #rep 3
-#        MF_position_now = MF_mean_xpos
-        
-    # rep 4
-    script_data["Mech Timer"]+=[MF_mean_xpos]
-    #mech_timer += [i * t_mech]
-    # rep 4
-    
-    #  newer way to get L 
 
+    script_data["Mech Timer"]+=[MF_mean_xpos]
+ 
+    #  newer way to get L 
     x_y_array = np.array(
         [
             [row["x"], row["y"], row["on_boundary"] == True]
@@ -962,8 +937,6 @@ def data_collection(i, tyssue):
     # rep 9
     script_data["cell_number_in_strip_pa"]+= [cell_number_in_x_strip_pa ]
     script_data["cell_shape_in_strip_pa"]+= [cell_shape_in_strip_pa_frame]
-    #cell_number_in_strip_pa += [cell_number_in_x_strip_pa ]
-    #cell_shape_in_strip_pa  += [cell_shape_in_strip_pa_frame]
     #
     remenant_area=0
     for index, row in sheet.face_df.iterrows():
@@ -1062,6 +1035,9 @@ def chemo_mech_iterator(
             initial_concentration += sheet.face_df[p_name].to_numpy().tolist()
         if kwargs["plot"] == True and i%t_plot==0:
             visualization(int(i/t_plot))
+            
+        if parameters["inactivate_posterior"]=="Yes":
+            inactivate_posterior(iterations_to_inactivation)
         # data collection moved before cell_grow since i use the store arrays for my growth rate
         #data_collection(i, sheet, store_cell_number, store_tissue_area, store_mitosis_index, store_MF_position, store_mech_timer, store_tissue_length)
         if (i%int(kwargs["stamp"]))==0:
