@@ -183,6 +183,33 @@ def analyze(bottom="./"):
     plt.savefig('cell_number_vs_time.png')
     plt.close()
     
+    plt.figure()
+    death=np.array(dict_from_file["cell_death"])
+    plt.ylabel("Number of Cell deaths ")
+    plt.xlabel("Time (h)")
+    #cell_number_array = []
+    #for i in range(0, plot_frame):
+    #    cell_number_array.append(dict_from_file["cell number"][i])
+    plt.plot(plot_time_array,death,'.')
+    #plt.show()
+    plt.savefig('apoptosis_vs_time.png')
+    plt.close()
+    
+    # plot area/perimeter
+    plt.figure()
+    np_perimeter=np.array(dict_from_file["perimeter"])
+    np_area=np.array(dict_from_file["tissue area"])
+    ratio=np_area/np_perimeter
+    plt.ylabel("Area/Perimeter ($μm^2$) ")
+    plt.xlabel("Time (h)")
+    #cell_number_array = []
+    #for i in range(0, plot_frame):
+    #    cell_number_array.append(dict_from_file["cell number"][i])
+    plt.plot(plot_time_array,ratio,'.')
+    #plt.show()
+    plt.savefig('area_over_perimeter_vs_time.png')
+    plt.close()
+    
     average_area=np.array(dict_from_file["tissue area"])/np.array(dict_from_file["cell number"])
     average_area=average_area/((conversion_r)**2)
     plt.figure()
@@ -201,10 +228,10 @@ def analyze(bottom="./"):
     Lpf=[]
     Laf=[]
     # the filter here serves the purporse of removing time points that MF has reached the end (if t_prol is non_zero, that is a different story!)
-    toggle_mf_filter=False
+    toggle_mf_filter=True
     MF_init_phase_threshold=50
     for i in range(0,len(dict_from_file['MF position']) ):
-        if dict_from_file['MF position'][i]!=0.0:
+        if dict_from_file['MF position'][i]==0.0:
             Lp+=[dict_from_file['L'][i][0]-dict_from_file['MF position'][i] ]
             La+=[dict_from_file['MF position'][i]-dict_from_file['L'][i][1] ]
             Lpf+=[dict_from_file['L'][i][0]-dict_from_file['MF position'][i] ]
@@ -294,26 +321,11 @@ def analyze(bottom="./"):
             
     out_dict['posterior_cell_area']=posterior_cell_area[0:plot_frame]
     out_dict['anterior_cell_area']=anterior_cell_area[0:plot_frame]
-    
-    plt.figure()
-    plt.ylabel("Average posterior cell area ($μm^2$)")
-    plt.xlabel("Time (h)")
-    plt.plot(plot_time_array,posterior_cell_area[0:plot_frame],'.')
-    plt.savefig('average_posterior_area_vs_time.png')
-    plt.close()
-
-    plt.figure()
-    plt.ylabel("Average anterior cell area ($μm^2$)")
-    plt.xlabel("Time (h)")
-    plt.plot(plot_time_array,anterior_cell_area[0:plot_frame],'.')
-    plt.savefig('average_anterior_area_vs_time.png')
-    plt.close()
-    
     # This average is not perfect
     # it includes zeroes, where proliferation ended, and simulation static result. 
     # perhaps we need to stop the simulation when MF reaches anterior to avoid this
-    average_posterior_cell_area = posterior_area_average_sum/non_zero_frame
-    average_anterior_cell_area = anterior_area_average_sum/non_zero_frame
+    average_posterior_cell_area = posterior_area_average_sum
+    average_anterior_cell_area = anterior_area_average_sum
     out_dict['average_posterior_cell_area']=average_posterior_cell_area
     out_dict['average_anterior_cell_area']=average_anterior_cell_area
     
@@ -343,6 +355,49 @@ def analyze(bottom="./"):
     plt.savefig(yname+"_vs_time.png")
     plt.close()
     
+    # total area jump in percent format 
+    yname="total_area_jump_percent"
+    total_area_jump_percent=np.array(total_area_jump)
+    total_area_jump_percent=total_area_jump_percent/np.array(out_dict['area'][0:-1])
+    plt.figure()
+    plt.ylabel(yname+" ($μm^2$)")
+    plt.xlabel("Time (h)")
+    plt.plot(plot_time_array_jump,total_area_jump_percent)
+    plt.savefig(yname+"_vs_time.png")
+    plt.close()
+    
+    # jump distribution analysis thershold
+    jump_threshold=int(30/conversion_t_hr)
+    total_area_jump_percent_dist=total_area_jump_percent[jump_threshold:]
+    # filter the non-jumps
+    filter_threshold=0.00
+    jump_index=[i for i in range(0,len(total_area_jump_percent_dist)) if total_area_jump_percent_dist[i]>filter_threshold]
+    total_area_jump_percent_dist=[item for item in total_area_jump_percent_dist if item>filter_threshold]
+    a = np.hstack( total_area_jump_percent_dist )
+    
+    # plot start
+    yname="jump_percent_distribution"
+    plt.figure()
+    plt.ylabel("Probability density ")
+    plt.xlabel("Jump %")
+    plt.hist(a, bins='auto')
+    plt.savefig(yname+".png")
+    plt.close()
+    
+    
+    jump_interval=[jump_index[i+1]-jump_index[i] for i in range(0,len(jump_index)-1) ]
+    a = np.hstack( jump_interval )
+    # plot start
+    yname="jump_interval_distribution"
+    plt.figure()
+    plt.ylabel("Probability density ")
+    plt.xlabel("Jump interval")
+    plt.hist(a, bins='auto')
+    plt.savefig(yname+".png")
+    plt.close()
+    
+    
+    
     yname="cell_area_jump"
     plt.figure()
     plt.ylabel(yname+" ($μm^2$)")
@@ -354,6 +409,80 @@ def analyze(bottom="./"):
     plt.savefig(yname+"_vs_time.png")
     plt.close()
 
+
+    time_filter=int(30/conversion_t_hr) 
+    average_total_area_jump_filtered=np.array(average_total_area_jump[time_filter:])
+    
+    # same for total area jump
+    #total_area_jump_filtered=np.array(total_area_jump[time_filter:])
+    
+    
+    #cell_area_jump_threshold=0.2
+    cell_area_jump_threshold=0.3
+    
+    jump_index=[i+time_filter for i in range(0,len(average_total_area_jump_filtered)) if average_total_area_jump_filtered[i]>cell_area_jump_threshold ]
+    
+    print(jump_index)
+    # let us calculate the deviation from average
+    
+    # has to be dict_from_file["radial_area_plot"][item][1] cause we got bin pos and area value
+    standard_deviation_from_average_area= [np.std(dict_from_file["radial_area_plot"][item][1]) for item in jump_index]
+    total_area_jump_for_plot = [total_area_jump[item] for item in jump_index]
+    # convert jump_index to time
+    jump_index_hr=np.array(jump_index)*conversion_t_hr
+    yname="area_std_per_jump"
+    plt.figure()
+    plt.ylabel(yname+" ($μm^2$)")
+    plt.xlabel("Time (h)")
+    plt.plot(jump_index_hr,standard_deviation_from_average_area,marker='.',linestyle = 'None')
+    plt.savefig(yname+"_vs_time.png")
+    plt.close()
+    
+    yname="area_std_per_jump_magnitude"
+    plt.figure()
+    plt.ylabel(yname+" ($μm^2$)")
+    plt.xlabel("Total Area Jump ($μm^2$)")
+    plt.plot(total_area_jump_for_plot,standard_deviation_from_average_area,marker='.',linestyle = 'None')
+    plt.savefig(yname+"_vs_time.png")
+    plt.close()
+    
+    
+    
+    #pressure plot params
+    ## The jump
+    number_of_frames=6
+    color_min_c=675*conversion_t_hr
+    ## The jump end
+    ## The buildup
+    number_of_frames=10+4
+    color_min_c=(675-number_of_frames)*conversion_t_hr
+    ## The buildup end
+    ## The initial phase
+    number_of_frames=130
+    color_min_c=(0)*conversion_t_hr
+    ## the initial phase end
+    #
+    
+#    # mechanosensing_doubled
+#    number_of_frames=6
+#    color_min_c=655*conversion_t_hr
+    
+    
+    color_saturation_c=(color_min_c+number_of_frames*conversion_t_hr)
+    yname="radial_area"
+    plt.figure()
+    plt.ylabel(yname+" ($pixel^2$)")
+    plt.xlabel("Radial distance from center (pixel)")
+    for i in range(0,number_of_frames):
+        r,area=dict_from_file["radial_area_plot"][int(color_min_c/conversion_t_hr)+i]
+        color = plt.cm.jet((color_min_c+i*conversion_t_hr-color_min_c)/(color_saturation_c-color_min_c))
+        plt.plot(r,area,color=color)
+    sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
+    sm.set_array([]) 
+    cbar=plt.colorbar(sm)
+    cbar.set_label("Time (h)",fontsize=20)
+    plt.savefig(yname+"_vs_time.png")
+    plt.close()
     
     ave_num_sides_MF = []
     for i in range (0, len(dict_from_file["average_number_of_sides_in_MF"])):
@@ -399,7 +528,7 @@ def analyze(bottom="./"):
         out_dict['finished']=False
     return out_dict
 
-
+analyze(bottom="pressure_plot/")
 
 
 #print(analyze())
