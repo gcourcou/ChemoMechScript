@@ -19,7 +19,7 @@ import numpy as np
 import json
 import matplotlib
 
-#matplotlib.use("Agg")
+matplotlib.use("Agg")
 import matplotlib.pylab as plt
 import matplotlib.animation as animation
 import ipyvolume as ipv
