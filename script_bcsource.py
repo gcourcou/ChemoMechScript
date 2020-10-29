@@ -715,7 +715,7 @@ def inactivate_posterior(iterations_to_inactivation):
     # 30 is arbitrary but it correspodns to two hours 30*conversion_t_hr=2.0hrs of OG
     inactivation_indexes=sheet.face_df.index[sheet.face_df["iterations_in_posterior"] == iterations_to_inactivation].tolist()
     for item in inactivation_indexes:
-        verts = sheet.edge_df.loc[sheet.edge_df['face'] == index, 'srce'].to_numpy()
+        verts = sheet.edge_df.loc[sheet.edge_df['face'] == item, 'srce'].to_numpy()
         sheet.vert_df.loc[verts, 'is_active'] = 0
 
 def visualization(i):
