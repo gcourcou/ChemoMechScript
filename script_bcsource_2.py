@@ -233,7 +233,7 @@ geom.update_all(sheet)
 # ## Set up the model
 nondim_specs = config.dynamics.quasistatic_plane_spec()
 dim_model_specs = model.dimensionalize(nondim_specs)
-sheet.update_specs(dim_model_specs, reset=True)
+sheet.update_specs(dim_model_specs, reset=False)
 
 print(
     "Number of cells: {}\n"
