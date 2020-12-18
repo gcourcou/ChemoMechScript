@@ -62,7 +62,8 @@ script_data = {}
 script_data_keys=["total real time","cell number","tissue area","MF position","Mech Timer","mitotic position","L",
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
                   "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape",
-                  "Posterior cell number", "Anterior cell number","growth_rate_alpha","cell_death","cell_division"]
+                  "Posterior cell number", "Anterior cell number","growth_rate_alpha","cell_death","cell_division",
+                  "shape_distribution","shape_average_area","shape_distribution_anterior","shape_average_area_anterior"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -970,7 +971,34 @@ def data_collection(i, tyssue):
     script_data["average_number_of_sides_in_MF"]+=[average_number_of_sides_in_MF_frame]
     script_data["average_area_in_MF"]+=[average_area_in_MF_frame]
     script_data["MF_shape"]+=[MF_shape_frame]
+
+    num_of_sides_values = sheet.face_df["num_sides"].value_counts().keys().tolist()
+    num_of_sides_counts = sheet.face_df["num_sides"].value_counts().tolist()
+    num_of_sides_percentages=[100*item/sheet.face_df.shape[0] for item in num_of_sides_counts]
+
+    script_data["shape_distribution"]+=[[num_of_sides_values,num_of_sides_percentages] ]
+    for index, row in sheet.face_df.iterrows():
+        sheet.face_df.at[index, "rlarea"] = (
+            sheet.face_df.at[index, "area"] / sheet.face_df["area"].mean()
+        )
+    rlarea_mean_dif_sides = sheet.face_df.groupby(["num_sides"])["rlarea"].mean()
+    script_data["shape_average_area"]+=[ [list(rlarea_mean_dif_sides.index.values) , rlarea_mean_dif_sides.to_list() ]]
     
+    # only anterior portion
+    anterior_df = sheet.face_df[  sheet.face_df["population_variable"]=='A'  ]
+
+    num_of_sides_values = anterior_df["num_sides"].value_counts().keys().tolist()
+    num_of_sides_counts = anterior_df["num_sides"].value_counts().tolist()
+    num_of_sides_percentages=[100*item/anterior_df.shape[0] for item in num_of_sides_counts]
+
+    script_data["shape_distribution_anterior"]+=[[num_of_sides_values,num_of_sides_percentages] ]
+    for index, row in anterior_df.iterrows():
+        anterior_df.at[index, "rlarea"] = (
+            anterior_df.at[index, "area"] / anterior_df["area"].mean()
+        )
+    rlarea_mean_dif_sides = anterior_df.groupby(["num_sides"])["rlarea"].mean()
+    script_data["shape_average_area_anterior"]+=[ [list(rlarea_mean_dif_sides.index.values) , rlarea_mean_dif_sides.to_list() ]]
+
 def chemo_mech_iterator(
     sheet,
     initial_concentration,
