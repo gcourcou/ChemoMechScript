@@ -339,7 +339,7 @@ def analyze(bottom="./"):
     total_area_label, = plt.plot(plot_time_array_jump,total_area_jump,color = 'green',marker='.', label='total area')
     posterior_area_label, =plt.plot(plot_time_array_jump,posterior_area_jump,color = 'blue',marker='.', label='posterior area')
     anterior_area_label, =plt.plot(plot_time_array_jump,anterior_area_jump,color = 'red',marker='.', label='anterior area')
-    plt.legend([total_area_label, posterior_area_label, anterior_area_label])
+    plt.legend(fontsize="small")
     plt.savefig(yname+"_vs_time.png")
     plt.close()
     
