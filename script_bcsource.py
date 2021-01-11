@@ -510,7 +510,11 @@ def animate_cells2(timer, chem_name, string, plot_time):
     color_cmap = cmap(sheet.face_df.col)
     draw_specs["face"]["color"] = color_cmap
     draw_specs["face"]["color_bar"] = True
-
+    
+    if chem_name=="area":
+        draw_specs["face"]["color_bar_range"]=[0,0.8]
+    else:
+        draw_specs["face"]["color_bar_range"]=False
     #    sheet.face_df['visible'] = True
     #    for index,row in sheet.face_df.iterrows():
     #        if (row['at_y_boundary'] == True):
