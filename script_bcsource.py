@@ -530,7 +530,7 @@ def animate_cells2(timer, chem_name, string, plot_time):
     plot_time=np.around(timer*conversion_t_hr*t_plot,decimals=2)
     fig.suptitle(plot_title + " at " + str(timer*conversion_t_hr*t_plot) + " hours", fontsize=14)
     # fig.set_title(chem_name+' frame '+str(timer))
-    plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",dpi=400)
+    plt.savefig("image" + string + chem_name + "{0:0=2d}".format(timer) + ".png",bbox_inches='tight',dpi=400)
     # plt.axis('off')
     # plt.show()
     plt.close()
