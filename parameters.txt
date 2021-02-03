@@ -35,3 +35,6 @@ cycle_magnitude			0.5
 mechanosensing_magnitude	0.04
 inactivate_posterior		Yes
 hours_to_inactivation		2.5
+viscocity_solver		Yes
+viscocity_solver_iterations	1
+viscocity_factor		1.

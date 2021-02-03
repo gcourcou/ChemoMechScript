@@ -38,6 +38,21 @@ from tyssue.generation import hexa_grid2d, from_2d_voronoi
 from itertools import count
 from tyssue.io import hdf5
 
+#viscuous solver
+from tyssue.topology import auto_t1, auto_t3
+def set_pos(eptm, geom, pos):
+    """Updates the vertex position of the :class:`Epithelium` object.
+    Assumes that pos is passed as a 1D array to be reshaped as (eptm.Nv, eptm.dim)
+    """
+    #log.debug("set pos")
+    eptm.vert_df.loc[eptm.active_verts, eptm.coords] = pos.reshape((-1, eptm.dim))
+    geom.update_all(eptm)
+
+def current_pos(eptm):
+        return eptm.vert_df.loc[
+            eptm.active_verts, eptm.coords
+        ].values.ravel()
+
 # for histogram bin number
 from scipy.stats import iqr
 
@@ -63,7 +78,8 @@ script_data_keys=["total real time","cell number","tissue area","MF position","M
                   "cell_number_in_strip","cell_number_in_strip_pa","cell_shape_in_strip_pa","Posterior area","Anterior area",
                   "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape",
                   "Posterior cell number", "Anterior cell number","growth_rate_alpha","cell_death","cell_division",
-                  "shape_distribution","shape_average_area","shape_distribution_anterior","shape_average_area_anterior"]
+                  "shape_distribution","shape_average_area","shape_distribution_anterior","shape_average_area_anterior"
+                  ,"max_grad_viscocity"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -1053,7 +1069,39 @@ def chemo_mech_iterator(
         cell_grow_and_divide(sheet)
         # before energy min is called we want to count our cells
         cells_before_min=len(sheet.face_df)
-        solver.find_energy_min(sheet, geom, model)
+        if parameters["viscocity_solver"]=='Yes':
+            # Structure gives us a max grad of 0.3 (temp value)
+            # Displace our vertices by how much?
+            
+            # Well 0.3 pixels/iteration = 1.3 μm/iteration = 1.3 μm/(hr * conversion_t_hr) = 19.4 μm/hr
+            
+            # Maximum speed of a cell is around 15μm/hr thus we need to multiply 19.4*X=15 <=> X=15/19.4
+            
+            # To be safe we are going to divide this by a factor of 10
+            
+            # viscuous solver
+            friction=(15/19.4)*(1/10)/kwargs["t_mech"]
+            friction=friction*parameters["viscocity_factor"]
+            n=int(parameters["viscocity_solver_iterations"])
+            for j in range(0,n):
+                #solver.find_energy_min(sheet, geom, model)
+                old_pos=current_pos(sheet)
+                # for T1 T3 transitions:
+                sheet.topo_changed=False
+                solver.set_pos(sheet, geom, old_pos)
+                
+                sheet.topo_changed=False
+                grad=solver._opt_grad(1,sheet,geom,model)
+                maxgrad=np.max(np.abs(grad))
+                print("GradmaX" +str(maxgrad) )
+                script_data["max_grad_viscocity"]+=[maxgrad]
+                new_pos=-1*grad*kwargs["t_mech"]*friction/n+old_pos
+                
+                #set_pos(sheet,geom,new_pos)
+                solver.set_pos(sheet, geom, new_pos)
+        else :
+            solver.find_energy_min(sheet, geom, model)
+        
         # after energy min is called we want to count our cells 
         cells_after_min=len(sheet.face_df)
         dead_cells=cells_before_min-cells_after_min
@@ -1067,7 +1115,6 @@ def chemo_mech_iterator(
             initial_concentration += sheet.face_df[p_name].to_numpy().tolist()
         if kwargs["plot"] == True and i%t_plot==0:
             visualization(int(i/t_plot))
-            
         if parameters["inactivate_posterior"]=="Yes":
             inactivate_posterior(iterations_to_inactivation)
         # data collection moved before cell_grow since i use the store arrays for my growth rate
@@ -1087,7 +1134,43 @@ def proliferation(sheet,**kwargs):
         
         cell_grow_and_divide(sheet)
         cells_before_min=len(sheet.face_df)
-        solver.find_energy_min(sheet, geom, model)
+        
+        
+        if parameters["viscocity_solver"]=='Yes':
+            # Structure gives us a max grad of 0.3 (temp value)
+            # Displace our vertices by how much?
+            
+            # Well 0.3 pixels/iteration = 1.3 μm/iteration = 1.3 μm/(hr * conversion_t_hr) = 19.4 μm/hr
+            
+            # Maximum speed of a cell is around 15μm/hr thus we need to multiply 19.4*X=15 <=> X=15/19.4
+            
+            # To be safe we are going to divide this by a factor of 10
+            
+            # viscuous solver
+            friction=(15/19.4)*(1/10)/kwargs["t_mech"]
+            friction=friction*parameters["viscocity_factor"]
+            n=int(parameters["viscocity_solver_iterations"])
+            for j in range(0,n):
+                #solver.find_energy_min(sheet, geom, model)
+                old_pos=current_pos(sheet)
+                # for T1 T3 transitions:
+                sheet.topo_changed=False
+                solver.set_pos(sheet, geom, old_pos)
+                
+                sheet.topo_changed=False
+                grad=solver._opt_grad(1,sheet,geom,model)
+                maxgrad=np.max(np.abs(grad))
+                print("GradmaX" +str(maxgrad) )
+                script_data["max_grad_viscocity"]+=[maxgrad]
+                new_pos=-1*grad*kwargs["t_mech"]*friction/n+old_pos
+                
+                #set_pos(sheet,geom,new_pos)
+                solver.set_pos(sheet, geom, new_pos)
+        else :
+            solver.find_energy_min(sheet, geom, model)
+
+        
+        
         cells_after_min=len(sheet.face_df)
         dead_cells=cells_before_min-cells_after_min
         # dead cells first added in list in cell_grow_and_divide 
