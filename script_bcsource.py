@@ -81,6 +81,7 @@ script_data_keys=["total real time","cell number","tissue area","MF position","M
                   "shape_distribution","shape_average_area","shape_distribution_anterior","shape_average_area_anterior"
                   ,"max_grad_viscocity","Energy"]
 
+
 # initialize data structures in dict
 if first_realization==True:
     for key in script_data_keys:
@@ -1095,12 +1096,16 @@ def chemo_mech_iterator(
                 maxgrad=np.max(np.abs(grad))
                 print("GradmaX" +str(maxgrad) )
                 script_data["max_grad_viscocity"]+=[maxgrad]
+                Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
+                script_data["Energy"]+=[Energy]
                 new_pos=-1*grad*kwargs["t_mech"]*friction/n+old_pos
                 
                 #set_pos(sheet,geom,new_pos)
                 solver.set_pos(sheet, geom, new_pos)
         else :
             solver.find_energy_min(sheet, geom, model)
+            Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
+            script_data["Energy"]+=[Energy]
         
         # after energy min is called we want to count our cells 
         cells_after_min=len(sheet.face_df)
@@ -1170,6 +1175,8 @@ def proliferation(sheet,**kwargs):
                 solver.set_pos(sheet, geom, new_pos)
         else :
             solver.find_energy_min(sheet, geom, model)
+            Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
+            script_data["Energy"]+=[Energy]
 
         
         
