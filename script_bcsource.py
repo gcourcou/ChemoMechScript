@@ -79,7 +79,7 @@ script_data_keys=["total real time","cell number","tissue area","MF position","M
                   "Remenant area", "average_number_of_sides_in_MF","average_area_in_MF","MF_shape",
                   "Posterior cell number", "Anterior cell number","growth_rate_alpha","cell_death","cell_division",
                   "shape_distribution","shape_average_area","shape_distribution_anterior","shape_average_area_anterior"
-                  ,"max_grad_viscocity"]
+                  ,"max_grad_viscocity","Energy"]
 
 # initialize data structures in dict
 if first_realization==True:
@@ -1162,6 +1162,8 @@ def proliferation(sheet,**kwargs):
                 maxgrad=np.max(np.abs(grad))
                 print("GradmaX" +str(maxgrad) )
                 script_data["max_grad_viscocity"]+=[maxgrad]
+                Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
+                script_data["Energy"]+=[Energy]
                 new_pos=-1*grad*kwargs["t_mech"]*friction/n+old_pos
                 
                 #set_pos(sheet,geom,new_pos)
