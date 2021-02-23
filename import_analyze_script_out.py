@@ -103,7 +103,9 @@ def analyze(bottom="./"):
     #names used for plots
     plot_area_names=["Total area","Posterior area","Anterior area"]
     plot_number_of_sides_in_MF=["average_number_of_sides_in_MF", "MF_shape"]
+    plot_number_of_sides_in_MF_names=["Average number of sides in MF", "MF shape (root square deviation)"]
     plot_area_MF=["average_area_in_MF"]
+    plot_area_MF_names=["Average area in MF"]
 
     
     skip_frame_start=0
@@ -139,7 +141,7 @@ def analyze(bottom="./"):
         plt.close()
     for i in range(0,len(plot_number_of_sides_in_MF)):
         key=plot_number_of_sides_in_MF[i]
-        yname=key
+        yname=plot_number_of_sides_in_MF_names[i]
         plt.figure()
         plt.ylabel(yname)
         plt.xlabel("Time (h)")
@@ -154,7 +156,7 @@ def analyze(bottom="./"):
         plt.close()
     for i in range(0,len(plot_area_MF)):
         key=plot_area_MF[i]
-        yname=key
+        yname=plot_area_MF_names[i]
         plt.figure()
         plt.ylabel(yname+" ($μm^2$)")
         plt.xlabel("Time (h)")
@@ -225,7 +227,7 @@ def analyze(bottom="./"):
     Lpf=np.array(Lpf)/conversion_r
     Laf=np.array(Laf)/conversion_r
     
-    plt.ylabel("Posterior Length (μm)")
+    plt.ylabel("Posterior length (μm)")
     plt.xlabel("Time (h)")   
     plt.plot(time_arrayf,Lpf,'.')
     #plt.show()
@@ -332,7 +334,7 @@ def analyze(bottom="./"):
         average_anterior_area_jump.append(out_dict['anterior_cell_area'][i+1]-out_dict['anterior_cell_area'][i])
     
     plot_time_array_jump = plot_time_array[0:plot_frame-1]
-    yname="area_jump"
+    yname="Area jump"
     plt.figure()
     plt.ylabel(yname+" ($μm^2$)")
     plt.xlabel("Time (h)")

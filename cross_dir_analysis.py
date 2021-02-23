@@ -71,12 +71,30 @@ for directory in targets:
     if directory[-1]!="_":
         os.chdir(top_dir+directory)
         print(str(directory))
-        temp=analyze(bottom="out_3/")
+        temp=analyze(bottom="out_0/")
         # touple
-        param=np.around(temp['parameters'][parameter_in_question],decimals=2)
-        store[param]=temp
+        param=np.around(temp['parameters'][parameter_in_question],decimals=2)  
+        if parameter_in_question == "MF_contract":
+            store[np.around(1-param, decimals=2)] = temp
+        else:
+            store[param]=temp
         #print(os.listdir())
 
+colorbar_name = {}
+parameters = {}
+with open("parameters.txt") as f:
+    for line in f:
+        (key, val) = line.split()
+        try:
+            parameters[str(key)] = float(val)
+        except:
+            parameters[str(key)] = str(val)
+    
+for key in parameters:
+    if key == "MF_contract":
+        colorbar_name[key] = "Apical constriction factor"
+    else:
+        colorbar_name[key] = key
 
 #print(store)
 print("store keys:")
@@ -102,7 +120,7 @@ os.chdir(top_dir)
 
 # zero was not valid
 #x_data = np.arange(.1,.9,.1)
-x_data=[1 + 1*(i) for i in range(0,10)]  
+x_data=[0.0 + 0.1*(i) for i in range(0,7)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
@@ -124,14 +142,14 @@ for item_x in x_data:
 #y_data=np.around(y_data,decimals=1)
 
 dict_y_x_labels={
-'MF speed':[parameter_in_question,"$(μm h^{-1})$"],'MF linearity':[parameter_in_question,"$R^2$"],
-'final average area':[parameter_in_question,"($μm^2$)"],'final area':[parameter_in_question,"($μm^2$)"],'total_mitotic_number':[parameter_in_question, " "], 
-'average_anterior_cell_area':[parameter_in_question,"($μm^2$)"],'average_posterior_cell_area':[parameter_in_question,"($μm^2$)"],
-'Lp':["Time (h)","($μm$)"],'La':["Time (h)","($μm$)"],
-'area':["Time (h)","($μm^2$)"], 'anterior_area':["Time (h)","($μm^2$)"], 'posterior_area':["Time (h)","($μm^2$)"],
-'average_number_of_sides_in_MF':["Time (h)"," "], 'average_area_in_MF':["Time (h)","($μm^2$)"], 'MF_shape':["Time (h)","Root Square Deviation"],
-'anterior_cell_area':["Time (h)","($μm^2$)"],'posterior_cell_area':["Time (h)","($μm^2$)"],
-    'cell number':["Time (h)","Cell Number"],'cell_death':["Time (h)","Apoptotic Cell Number"],'cell_division':["Time (h)","Mitotic Cell Number"],
+'MF speed':[parameter_in_question,"MF speed $(μm h^{-1})$"],'MF linearity':[parameter_in_question,"MF linearity $R^2$"],
+'final average area':[parameter_in_question,"Final average area ($μm^2$)"],'final area':[parameter_in_question,"Final area($μm^2$)"],'total_mitotic_number':[parameter_in_question, "Total mitotic number"], 
+'average_anterior_cell_area':[parameter_in_question,"Average anterior cell area ($μm^2$)"],'average_posterior_cell_area':[parameter_in_question,"Average posterior cell area ($μm^2$)"],
+'Lp':["Time (h)","Lp ($μm$)"],'La':["Time (h)","La ($μm$)"],
+'area':["Time (h)","Area ($μm^2$)"], 'anterior_area':["Time (h)","Anterior area ($μm^2$)"], 'posterior_area':["Time (h)","Posterior area ($μm^2$)"],
+'average_number_of_sides_in_MF':["Time (h)","Average number of sides in MF"], 'average_area_in_MF':["Time (h)","Average area in MF ($μm^2$)"], 'MF_shape':["Time (h)","MF shape (root square deviation)"],
+'anterior_cell_area':["Time (h)","Anterior cell area ($μm^2$)"],'posterior_cell_area':["Time (h)","Posterior cell area ($μm^2$)"],
+    'cell number':["Time (h)","Cell number"],'cell_death':["Time (h)","Apoptotic Cell Number"],'cell_division':["Time (h)","Mitotic Cell Number"],
 'mitotic_number_list':["Normalized Time","Division Number"],
 'mitotic_frequency':["relative position to MF", "frequency"], 'final cell number':[parameter_in_question,"Cell Number"]
 }
@@ -188,10 +206,11 @@ for key in plot_keys_vectors:
     y_range_up=np.max(max_y)
     y_range_down=np.min(min_y)
     plt.ylim(y_range_down,y_range_up)
+    
     sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
     cbar=plt.colorbar(sm)
-    cbar.set_label(parameter_in_question,fontsize=20)
-    plt.title(str(key))
+    cbar.set_label(colorbar_name[parameter_in_question],fontsize=20)
+#    plt.title(str(key))
     print(str(key) + " time dep plot x range is " )
     print(x_range_up)
     print(x_range_down)
@@ -229,8 +248,8 @@ for key in plot_keys_MF:
     plt.ylim(y_range_down,y_range_up)
     sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
     cbar=plt.colorbar(sm)
-    cbar.set_label(parameter_in_question,fontsize=20)
-    plt.title(str(key))
+    cbar.set_label(colorbar_name[parameter_in_question],fontsize=20)
+#    plt.title(str(key))
     print(str(key) + " time dep plot x range is " )
     print(x_range_up)
     print(x_range_down)
@@ -250,7 +269,7 @@ for key in plot_keys:
     for item_x in x_data:
         plt.scatter(item_x,store[item_x][key],color=colour_data[item_x])
     #plt.plot(x_data,a[key],'.')
-    plt.title(str(key))
+#    plt.title(str(key))
     # x y labels from dict
     plt.xlabel(dict_y_x_labels[key][0])
     plt.ylabel(dict_y_x_labels[key][1])
@@ -275,8 +294,8 @@ y_range_down=np.min(min_y)
 plt.ylim(y_range_down,y_range_up)
 sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
 cbar=plt.colorbar(sm)
-cbar.set_label(parameter_in_question,fontsize=20)
-plt.title(str(key))
+cbar.set_label(colorbar_name[parameter_in_question],fontsize=20)
+#plt.title(str(key))
 # x y labbesl from dict
 plt.xlabel(dict_y_x_labels[key][0])
 plt.ylabel(dict_y_x_labels[key][1])
