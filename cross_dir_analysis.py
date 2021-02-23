@@ -73,10 +73,28 @@ for directory in targets:
         print(str(directory))
         temp=analyze(bottom="out_0/")
         # touple
-        param=np.around(temp['parameters'][parameter_in_question],decimals=2)
-        store[param]=temp
+        param=np.around(temp['parameters'][parameter_in_question],decimals=2)  
+        if parameter_in_question == "MF_contract":
+            store[np.around(1-param, decimals=2)] = temp
+        else:
+            store[param]=temp
         #print(os.listdir())
 
+colorbar_name = {}
+parameters = {}
+with open("parameters.txt") as f:
+    for line in f:
+        (key, val) = line.split()
+        try:
+            parameters[str(key)] = float(val)
+        except:
+            parameters[str(key)] = str(val)
+    
+for key in parameters:
+    if key == "MF_contract":
+        colorbar_name[key] = "Apical constriction factor"
+    else:
+        colorbar_name[key] = key
 
 #print(store)
 print("store keys:")
@@ -102,7 +120,7 @@ os.chdir(top_dir)
 
 # zero was not valid
 #x_data = np.arange(.1,.9,.1)
-x_data=[1 + 1*(i) for i in range(0,10)]  
+x_data=[0.0 + 0.1*(i) for i in range(0,7)]  
 #x_data = np.arange(1.12,1.32,.02)
 x_data=np.around(x_data,decimals=2)
 
@@ -188,9 +206,10 @@ for key in plot_keys_vectors:
     y_range_up=np.max(max_y)
     y_range_down=np.min(min_y)
     plt.ylim(y_range_down,y_range_up)
+    
     sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
     cbar=plt.colorbar(sm)
-    cbar.set_label(parameter_in_question,fontsize=20)
+    cbar.set_label(colorbar_name[parameter_in_question],fontsize=20)
 #    plt.title(str(key))
     print(str(key) + " time dep plot x range is " )
     print(x_range_up)
@@ -229,7 +248,7 @@ for key in plot_keys_MF:
     plt.ylim(y_range_down,y_range_up)
     sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
     cbar=plt.colorbar(sm)
-    cbar.set_label(parameter_in_question,fontsize=20)
+    cbar.set_label(colorbar_name[parameter_in_question],fontsize=20)
 #    plt.title(str(key))
     print(str(key) + " time dep plot x range is " )
     print(x_range_up)
@@ -275,7 +294,7 @@ y_range_down=np.min(min_y)
 plt.ylim(y_range_down,y_range_up)
 sm = plt.cm.ScalarMappable(cmap=plt.cm.jet, norm=plt.Normalize(vmin=color_min_c, vmax=1*color_saturation_c))
 cbar=plt.colorbar(sm)
-cbar.set_label(parameter_in_question,fontsize=20)
+cbar.set_label(colorbar_name[parameter_in_question],fontsize=20)
 #plt.title(str(key))
 # x y labbesl from dict
 plt.xlabel(dict_y_x_labels[key][0])
