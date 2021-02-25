@@ -142,16 +142,16 @@ for item_x in x_data:
 #y_data=np.around(y_data,decimals=1)
 
 dict_y_x_labels={
-'MF speed':[parameter_in_question,"MF speed $(μm h^{-1})$"],'MF linearity':[parameter_in_question,"MF linearity $R^2$"],
-'final average area':[parameter_in_question,"Final average area ($μm^2$)"],'final area':[parameter_in_question,"Final area($μm^2$)"],'total_mitotic_number':[parameter_in_question, "Total mitotic number"], 
-'average_anterior_cell_area':[parameter_in_question,"Average anterior cell area ($μm^2$)"],'average_posterior_cell_area':[parameter_in_question,"Average posterior cell area ($μm^2$)"],
+'MF speed':[colorbar_name[parameter_in_question],"MF speed $(μm h^{-1})$"],'MF linearity':[colorbar_name[parameter_in_question],"MF linearity $R^2$"],
+'final average area':[colorbar_name[parameter_in_question],"Final average area ($μm^2$)"],'final area':[colorbar_name[parameter_in_question],"Final area($μm^2$)"],'total_mitotic_number':[colorbar_name[parameter_in_question], "Total mitotic number"], 
+'average_anterior_cell_area':[colorbar_name[parameter_in_question],"Average anterior cell area ($μm^2$)"],'average_posterior_cell_area':[colorbar_name[parameter_in_question],"Average posterior cell area ($μm^2$)"],
 'Lp':["Time (h)","Lp ($μm$)"],'La':["Time (h)","La ($μm$)"],
 'area':["Time (h)","Area ($μm^2$)"], 'anterior_area':["Time (h)","Anterior area ($μm^2$)"], 'posterior_area':["Time (h)","Posterior area ($μm^2$)"],
 'average_number_of_sides_in_MF':["Time (h)","Average number of sides in MF"], 'average_area_in_MF':["Time (h)","Average area in MF ($μm^2$)"], 'MF_shape':["Time (h)","MF shape (root square deviation)"],
 'anterior_cell_area':["Time (h)","Anterior cell area ($μm^2$)"],'posterior_cell_area':["Time (h)","Posterior cell area ($μm^2$)"],
     'cell number':["Time (h)","Cell number"],'cell_death':["Time (h)","Apoptotic Cell Number"],'cell_division':["Time (h)","Mitotic Cell Number"],
 'mitotic_number_list':["Normalized Time","Division Number"],
-'mitotic_frequency':["relative position to MF", "frequency"], 'final cell number':[parameter_in_question,"Cell Number"]
+'mitotic_frequency':["relative position to MF", "frequency"], 'final cell number':[colorbar_name[parameter_in_question],"Cell Number"]
 }
 
 
