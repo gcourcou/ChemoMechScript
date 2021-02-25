@@ -2,9 +2,9 @@
 # use agg backend matplotlib.use('Agg')
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
-sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
-#sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
-#sys.path.insert(0,"/scratch/chixu/tools/tyssue")
+#sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
+sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
+sys.path.insert(0,"/scratch/chixu/tools/tyssue")
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -256,7 +256,7 @@ else:
 os.chdir(name) 
 # Ellipse!
 rx = parameters["rx"]
-rx = 1
+
 # eye disc elliptic shape factor
 sigma = 172.0 / 74.0
 ry = rx * sigma
