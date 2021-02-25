@@ -256,6 +256,8 @@ else:
 os.chdir(name) 
 # Ellipse!
 rx = parameters["rx"]
+
+# eye disc elliptic shape factor
 sigma = 172.0 / 74.0
 ry = rx * sigma
 
@@ -529,9 +531,9 @@ def animate_cells2(timer, chem_name, string, plot_time):
     draw_specs["face"]["color_bar"] = True
     
     if chem_name=="area":
-        draw_specs["face"]["color_bar_range"]=[0,0.8]
+        draw_specs["axis"]["color_bar_range"]=[0,0.8]
     else:
-        draw_specs["face"]["color_bar_range"]=False
+        draw_specs["axis"]["color_bar_range"]=False
     #    sheet.face_df['visible'] = True
     #    for index,row in sheet.face_df.iterrows():
     #        if (row['at_y_boundary'] == True):
@@ -743,8 +745,8 @@ def inactivate_posterior(iterations_to_inactivation):
 def visualization(i):
     plot_time=str(np.around(i*conversion_t_hr*t_plot,decimals=2))
     animate_cells2(i, "y_concentration", "mech",plot_time)
-#    animate_cells2(i, "area", "mech")
-#    animate_cells2(i, "num_sides", "mech")
+    animate_cells2(i, "area", "mech",plot_time)
+    animate_cells2(i, "num_sides", "mech",plot_time)
     animate_cells_MF(i, "y_concentration", "MF",plot_time)
     plot_chem(i, "y_concentration", "MFvsx",plot_time)
     plot_chem(i, "area", "areavsx",plot_time)
