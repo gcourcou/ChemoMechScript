@@ -389,7 +389,7 @@ auto_prod_mag[0]=h_auto
 # Cell div pars
 
 # Cell grow and divide params
-growth_control_by = parameters["growth_control_by"]
+#growth_control_by = parameters["growth_control_by"]
 
 ## Initialize other cell centric variabls not included in tyssue
 # global parameter for t_mech steps
