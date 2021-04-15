@@ -521,17 +521,23 @@ def animate_cells2(timer, chem_name, string, plot_time):
     # String tells us how to name file after image
     plt.clf()
     # sheet.face_df['col'] = np.array([ sol.y[i][-1] for i in range(0,sheet.face_df.shape[0]) ])
-    sheet.face_df["col"] = sheet.face_df[chem_name]
+    
+
+    if chem_name=="area":
+        draw_specs["axis"]["color_bar_range"]=[0,0.8]
+        sheet.face_df["col"] = ( sheet.face_df[chem_name] - draw_specs["axis"]["color_bar_range"][0] ) *( 1/(draw_specs["axis"]["color_bar_range"][1] -draw_specs["axis"]["color_bar_range"][0] ) )
+    else:
+        draw_specs["axis"]["color_bar_range"]=False
+        try:
+            sheet.face_df["col"] = ( sheet.face_df[chem_name] - np.min(sheet.face_df[chem_name]) ) *( 1/(np.max(sheet.face_df[chem_name]) -np.min(sheet.face_df[chem_name])) )
+        except:
+            sheet.face_df["col"] = sheet.face_df[chem_name]
+
     cmap = plt.cm.get_cmap("viridis")
     color_cmap = cmap(sheet.face_df.col)
     draw_specs["face"]["color"] = color_cmap
     draw_specs["face"]["color_bar"] = True
-
-    if chem_name=="area":
-        draw_specs["axis"]["color_bar_range"]=[0,0.8]
-    else:
-        draw_specs["axis"]["color_bar_range"]=False
-
+    
     #    sheet.face_df['visible'] = True
     #    for index,row in sheet.face_df.iterrows():
     #        if (row['at_y_boundary'] == True):
