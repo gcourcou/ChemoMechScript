@@ -2,7 +2,7 @@
 # use agg backend matplotlib.use('Agg')
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
-#sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
+sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
 sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
 sys.path.insert(0,"/scratch/chixu/tools/tyssue")
 
@@ -28,7 +28,7 @@ from tyssue import PlanarGeometry
 from tyssue.geometry.planar_geometry import PlanarGeometry as geom
 from tyssue.solvers.quasistatic import QSSolver
 from tyssue.dynamics.planar_vertex_model import PlanarModel as model
-from tyssue.draw import sheet_view, sheet_view_GC_colorbar
+from tyssue.draw import sheet_view
 from tyssue.stores import load_datasets
 from tyssue.topology.sheet_topology import remove_face, cell_division
 from scipy.spatial import Voronoi
@@ -264,7 +264,7 @@ ry = rx * sigma
 
 
 if first_realization==True:
-    sheet = sheet.extract_bounding_box_GC_2dellipse(rx, ry, coords=["x", "y"])
+    sheet = sheet.extract_bounding_box_2dellipse(rx, ry, coords=["x", "y"])
     from tyssue.topology.base_topology import merge_border_edges
     merge_border_edges(sheet)
 else:
@@ -530,7 +530,7 @@ def animate_cells2(timer, chem_name, string, plot_time):
         draw_specs["axis"]["color_bar_range"]=[0,0.8]
         sheet.face_df["col"] = ( sheet.face_df[chem_name] - draw_specs["axis"]["color_bar_range"][0] ) *( 1/(draw_specs["axis"]["color_bar_range"][1] -draw_specs["axis"]["color_bar_range"][0] ) )
     else:
-        draw_specs["axis"]["color_bar_range"]=False
+        draw_specs["axis"]["color_bar_range"]=[np.min(sheet.face_df[chem_name]),np.max(sheet.face_df[chem_name])]
         try:
             sheet.face_df["col"] = ( sheet.face_df[chem_name] - np.min(sheet.face_df[chem_name]) ) *( 1/(np.max(sheet.face_df[chem_name]) -np.min(sheet.face_df[chem_name])) )
         except:
@@ -539,14 +539,14 @@ def animate_cells2(timer, chem_name, string, plot_time):
     cmap = plt.cm.get_cmap("viridis")
     color_cmap = cmap(sheet.face_df.col)
     draw_specs["face"]["color"] = color_cmap
-    draw_specs["face"]["color_bar"] = True
+    draw_specs["axis"]["color_bar"] = True
     
     #    sheet.face_df['visible'] = True
     #    for index,row in sheet.face_df.iterrows():
     #        if (row['at_y_boundary'] == True):
     #            sheet.face_df.at[index,'visible'] = False
     # fig, ax= sheet_view(sheet, coords, **draw_specs)
-    fig, ax1, ax2 = sheet_view_GC_colorbar(sheet, coords, **draw_specs)
+    fig, ax = sheet_view(sheet, coords, **draw_specs)
     fig.set_size_inches(6, 6)
     # change of name
     if chem_name=="y_concentration":
@@ -584,7 +584,7 @@ def animate_cells_MF(timer, chem_name, string, plot_time):
     #        if (row['at_y_boundary'] == True):
     #            sheet.face_df.at[index,'visible'] = False
     # fig, ax= sheet_view(sheet, coords, **draw_specs)
-    fig, ax1, ax2 = sheet_view_GC_colorbar(sheet, coords, **draw_specs)
+    fig, ax = sheet_view(sheet, coords, **draw_specs)
     fig.set_size_inches(6, 6)
     #plot_time=np.around(timer*conversion_t_hr*t_plot,decimals=2)
     fig.suptitle("MF position at " + str(plot_time) +" hours", fontsize=14)
