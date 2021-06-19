@@ -3,7 +3,8 @@
 # dont forget to use sys.argv to input folder name! attempt=sys.argv[1] instead of input
 import sys
 sys.path.insert(0,"/Users/georgecourcoubetis/Project/Computational/Github/tyssue_git_fork")
-sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
+sys.path.insert(0,"/project/shaas_31/courcoub/tyssue/tools/tools/tyssue")
+#sys.path.insert(0,"/scratch/courcoub/tyssue/tools/tools/tyssue")
 sys.path.insert(0,"/scratch/chixu/tools/tyssue")
 
 import warnings
@@ -282,6 +283,9 @@ geom.update_all(sheet)
 nondim_specs = config.dynamics.quasistatic_plane_spec()
 dim_model_specs = model.dimensionalize(nondim_specs)
 sheet.update_specs(dim_model_specs, reset=True)
+
+sheet.settings['threshold_length'] = 1e-2
+sheet.face_df['id'] = sheet.face_df.index
 
 print(
     "Number of cells: {}\n"

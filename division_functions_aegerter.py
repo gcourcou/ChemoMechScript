@@ -121,6 +121,7 @@ def cell_Aegerter_area(sheet,Vd=1.,mu=0.04,A0=0.5,alpha=1,long_axis_div=True) :
                 sheet.face_df.at[index, "time_for_growth"]=sheet.face_df.at[index, "time_for_growth"]/2.
                 angle_div = random.random() * np.pi
                 daughter = cell_division(sheet, index, geom, angle=angle_div)
+                sheet.face_df.loc[daughter, "id"] = sheet.face_df['id'].max() + 1
     return mitotic_shape,mitotic_pos
 
 
@@ -137,6 +138,7 @@ def cell_Aegerter_uni(sheet,Vd=1.,mu=0.04,A0=0.5,alpha=1,long_axis_div=True):
                 sheet.face_df.at[index, "time_for_growth"]=sheet.face_df.at[index, "time_for_growth"]/2.
                 angle_div = random.random() * np.pi
                 daughter = cell_division(sheet, index, geom, angle=angle_div)
+                sheet.face_df.loc[daughter, "id"] = sheet.face_df['id'].max() + 1
                 sheet.face_df.at[index,'uniform_growth_parameter']=0.25+1.5*np.random.random()
                 sheet.face_df.at[daughter,'uniform_growth_parameter']=0.25+1.5*np.random.random()
     return mitotic_shape,mitotic_pos
