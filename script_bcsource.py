@@ -1120,7 +1120,7 @@ def chemo_mech_iterator(
         else :
             #Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
             solver.find_energy_min(sheet, geom, model)
-            script_data["Energy"]+=[Energy]
+            #script_data["Energy"]+=[Energy]
         
         # after energy min is called we want to count our cells 
         cells_after_min=len(sheet.face_df)
