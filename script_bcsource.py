@@ -1118,7 +1118,7 @@ def chemo_mech_iterator(
                 #set_pos(sheet,geom,new_pos)
                 solver.set_pos(sheet, geom, new_pos)
         else :
-            Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
+            #Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
             solver.find_energy_min(sheet, geom, model)
             script_data["Energy"]+=[Energy]
         
