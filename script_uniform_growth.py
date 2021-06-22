@@ -1156,10 +1156,8 @@ def chemo_mech_iterator(
                 #set_pos(sheet,geom,new_pos)
                 solver.set_pos(sheet, geom, new_pos)
         else :
-            # energy save value step raises errors for some reason
-            #Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
-            solver.find_energy_min(sheet, geom, model)
-            #script_data["Energy"]+=[Energy]
+            temp=solver.find_energy_min(sheet, geom, model)
+            script_data["Energy"]+=[temp.fun]
         # after energy min is called we want to count our cells 
         cells_after_min=len(sheet.face_df)
         dead_cells=cells_before_min-cells_after_min
@@ -1223,9 +1221,8 @@ def proliferation(sheet,**kwargs):
                 #set_pos(sheet,geom,new_pos)
                 solver.set_pos(sheet, geom, new_pos)
         else :
-            solver.find_energy_min(sheet, geom, model)
-            Energy=solver._opt_energy(current_pos(sheet),sheet,geom,model)
-            script_data["Energy"]+=[Energy]
+            temp=solver.find_energy_min(sheet, geom, model)
+            script_data["Energy"]+=[temp.fun]
         cells_after_min=len(sheet.face_df)
         dead_cells=cells_before_min-cells_after_min
         # dead cells first added in list in cell_grow_and_divide 
