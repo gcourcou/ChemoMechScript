@@ -232,7 +232,7 @@ os.makedirs(name, exist_ok=True)
 #################
 
 
-solver = QSSolver(with_collisions=False, with_t1=True, with_t3=True)
+solver = QSSolver(with_collisions=False, with_t1=True, with_t3=False)
 
 nx = parameters["nx"]
 ny = parameters["ny"] + 1
@@ -816,7 +816,7 @@ def cell_grow_and_divide(tyssue):
     # rep 10 this can be done since cell_GS is executed every t_mech anyway!
     script_data["mitotic position"]+=[mitotic_position]
     #
-    tri_faces = sheet.face_df[sheet.face_df["num_sides"] < 4].index
+    tri_faces = sheet.face_df[ (sheet.face_df["num_sides"] < 4) & (sheet.face_df["area"] < 0.001)  ].index
     script_data["cell_death"]+=[len(tri_faces)]
     #print(len(tri_faces))
     cells = sheet.face_df.shape[0]
