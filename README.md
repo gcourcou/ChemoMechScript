@@ -3,7 +3,7 @@
 This repository contains the necessarily materials to reproduce the results in "Avalanches During Epithelial Tissue Growth; Uniform Growth and a Drosophila Eye Disc Model" by Courcoubetis et. al. 
 
 
-There are two models herein: A uniform growth model ran by executing script_uniform_growth.py and an Drosophila eye disc model by executing script_bcsource.py.
+There are two models herein: A uniform growth model ran by executing script_uniform_growth.py and a Drosophila eye disc model ran by executing script_bcsource.py.
 
 For explanation of parameters, see parameter explanation.txt file. 
 
@@ -23,6 +23,6 @@ After completing the installation, clone the current repository and execute eith
 
 E.g. python script_uniform_growth.py example_name will execute eye disc growth model with the output saved on a directory named example_name .
 
-The remaining files (e.g. Plotter_mate.py, single_dir_analysis.py, cross_dir_analysis.py, import_analyze_script_out.py, mitotic_frequency.py ) are used to analyze the output of the simulations and produce plots of the results.
+The remaining files (e.g. Plotter_mate.py, single_dir_analysis.py, cross_dir_analysis.py, import_analyze_script_out.py, mitotic_frequency.py ) are used to analyze the output of the simulations and produce plots of the results. Be warned, one might need to manually edit the files for desired outcomes.
 
 Note: Some files such as run_george/run_chi, master.py and gen2.py were used to submit jobs using slurm on a remote machine and can be ignored by third parties.
